@@ -38,11 +38,7 @@ import EditRecipeDialog from "./EditRecipeDialog";
 
 function TabPanel({ children, value, index, ...other }) {
   return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      {...other}
-    >
+    <div role="tabpanel" hidden={value !== index} {...other}>
       {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
     </div>
   );
@@ -54,13 +50,13 @@ export default function RecipeManagement() {
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+
   // Dialog states
   const [addProductDialogOpen, setAddProductDialogOpen] = useState(false);
   const [addRecipeDialogOpen, setAddRecipeDialogOpen] = useState(false);
   const [editRecipeDialogOpen, setEditRecipeDialogOpen] = useState(false);
   const [selectedRecipe, setSelectedRecipe] = useState(null);
-  
+
   // Delete confirmation dialog
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
@@ -92,7 +88,7 @@ export default function RecipeManagement() {
       setProducts(data);
     } catch (error) {
       console.error("Failed to fetch products:", error);
-      throw error;
+      setError("Failed to fetch products");
     }
   };
 
@@ -106,7 +102,7 @@ export default function RecipeManagement() {
       setRecipes(data);
     } catch (error) {
       console.error("Failed to fetch recipes:", error);
-      throw error;
+      setError("Failed to fetch recipes");
     }
   };
 
@@ -115,16 +111,16 @@ export default function RecipeManagement() {
   };
 
   const handleProductAdded = (newProduct) => {
-    setProducts(prev => [...prev, newProduct]);
+    setProducts((prev) => [...prev, newProduct]);
   };
 
   const handleRecipeAdded = (newRecipe) => {
-    setRecipes(prev => [...prev, newRecipe]);
+    setRecipes((prev) => [...prev, newRecipe]);
   };
 
   const handleRecipeUpdated = (updatedRecipe) => {
-    setRecipes(prev => 
-      prev.map(recipe => 
+    setRecipes((prev) =>
+      prev.map((recipe) =>
         recipe.id === updatedRecipe.id ? updatedRecipe : recipe
       )
     );
@@ -143,27 +139,31 @@ export default function RecipeManagement() {
 
   const handleDeleteConfirm = async () => {
     try {
-      const endpoint = deleteType === "product" 
-        ? `/api/products/${itemToDelete.id}`
-        : `/api/recipes/${itemToDelete.id}`;
-        
+      setError(null);
+      const endpoint =
+        deleteType === "product"
+          ? `/api/products/${itemToDelete.id}`
+          : `/api/recipes/${itemToDelete.id}`;
+
       const res = await fetch(endpoint, { method: "DELETE" });
-      
+
       if (res.ok) {
         if (deleteType === "product") {
-          setProducts(prev => prev.filter(p => p.id !== itemToDelete.id));
+          setProducts((prev) => prev.filter((p) => p.id !== itemToDelete.id));
           // Also remove related recipes
-          setRecipes(prev => prev.filter(r => r.productId !== itemToDelete.id));
+          setRecipes((prev) =>
+            prev.filter((r) => r.productId !== itemToDelete.id)
+          );
         } else {
-          setRecipes(prev => prev.filter(r => r.id !== itemToDelete.id));
+          setRecipes((prev) => prev.filter((r) => r.id !== itemToDelete.id));
         }
       } else {
         const error = await res.json();
-        alert(`Error: ${error.error}`);
+        setError(error.error || "Failed to delete item");
       }
     } catch (error) {
       console.error("Failed to delete:", error);
-      alert("Failed to delete item");
+      setError("Failed to delete item");
     } finally {
       setDeleteDialogOpen(false);
       setItemToDelete(null);
@@ -174,13 +174,18 @@ export default function RecipeManagement() {
   const calculateRecipeCost = (recipe) => {
     if (!recipe.ingredients) return 0;
     return recipe.ingredients.reduce((total, ri) => {
-      return total + (ri.quantity * ri.ingredient.costPerUnit);
+      return total + ri.quantity * ri.ingredient.costPerUnit;
     }, 0);
   };
 
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="200px"
+      >
         <CircularProgress />
       </Box>
     );
@@ -199,25 +204,17 @@ export default function RecipeManagement() {
       <Typography variant="h4" gutterBottom>
         Recipe & Product Management
       </Typography>
-      
-      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+
+      <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
         <Tabs value={tabValue} onChange={handleTabChange}>
-          <Tab 
-            label="Products" 
-            icon={<CoffeeIcon />} 
-            iconPosition="start"
-          />
-          <Tab 
-            label="Recipes" 
-            icon={<RestaurantIcon />} 
-            iconPosition="start"
-          />
+          <Tab label="Products" icon={<CoffeeIcon />} iconPosition="start" />
+          <Tab label="Recipes" icon={<RestaurantIcon />} iconPosition="start" />
         </Tabs>
       </Box>
 
       {/* Products Tab */}
       <TabPanel value={tabValue} index={0}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
+        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>
           <Typography variant="h5">Products ({products.length})</Typography>
           <Button
             variant="contained"
@@ -236,16 +233,26 @@ export default function RecipeManagement() {
                   <Typography variant="h6" gutterBottom>
                     {product.name}
                   </Typography>
-                  <Chip 
-                    label={product.category} 
-                    color="primary" 
-                    size="small" 
+                  <Chip
+                    label={product.category}
+                    color="primary"
+                    size="small"
                     sx={{ mb: 2 }}
                   />
-                  <Typography variant="body2" color="text.secondary" gutterBottom>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    gutterBottom
+                  >
                     Recipes: {product.recipes?.length || 0}
                   </Typography>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      mt: 2,
+                    }}
+                  >
                     <Button
                       size="small"
                       color="error"
@@ -263,7 +270,7 @@ export default function RecipeManagement() {
 
       {/* Recipes Tab */}
       <TabPanel value={tabValue} index={1}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
+        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>
           <Typography variant="h5">Recipes ({recipes.length})</Typography>
           <Button
             variant="contained"
@@ -359,8 +366,9 @@ export default function RecipeManagement() {
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to delete this {deleteType}? 
-            {deleteType === "product" && " This will also delete all associated recipes."}
+            Are you sure you want to delete this {deleteType}?
+            {deleteType === "product" &&
+              " This will also delete all associated recipes."}
             This action cannot be undone.
           </DialogContentText>
         </DialogContent>

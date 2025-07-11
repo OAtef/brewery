@@ -9,6 +9,7 @@ import {
   Paper,
   Button,
   Box,
+  Alert,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import AddIngredientDialog from "./AddIngredientDialog";
@@ -28,9 +29,10 @@ export default function InventoryManagement() {
       const res = await fetch("/api/inventory");
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
+      } else {
+        const data = await res.json();
+        setIngredients(data);
       }
-      const data = await res.json();
-      setIngredients(data);
     } catch (error) {
       console.error("Failed to fetch ingredients:", error);
       setError(error);
@@ -66,7 +68,7 @@ export default function InventoryManagement() {
   }
 
   if (error) {
-    return <div>Error: {error.message}</div>;
+    return <Alert severity="error">Error: {error.message}</Alert>;
   }
 
   return (
@@ -101,7 +103,9 @@ export default function InventoryManagement() {
                 <TableCell component="th" scope="row">
                   {ingredient.name}
                 </TableCell>
-                <TableCell align="right">{getUnitDisplayText(ingredient.unit)}</TableCell>
+                <TableCell align="right">
+                  {getUnitDisplayText(ingredient.unit)}
+                </TableCell>
                 <TableCell align="right">{ingredient.currentStock}</TableCell>
                 <TableCell align="right">{ingredient.costPerUnit}</TableCell>
                 <TableCell align="right">

@@ -1,0 +1,98 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+model Ingredient {
+  id               Int              @id @default(autoincrement())
+  name             String
+  unit             String           // e.g., "g", "ml", "piece"
+  costPerUnit      Float
+  currentStock     Float
+  wastePercentage  Float            // e.g., 0.1 for 10%
+  recipeIngredients RecipeIngredient[]
+  inventoryLogs    InventoryLog[]
+}
+
+model Product {
+  id          Int          @id @default(autoincrement())
+  name        String
+  category    String       // e.g., "Espresso", "Can", "Specialty"
+  recipes     Recipe[]
+  sales       Sale[]
+}
+
+model Recipe {
+  id         Int                 @id @default(autoincrement())
+  product    Product             @relation(fields: [productId], references: [id])
+  productId  Int
+  variant    String              // e.g., "Vega", "Decaf", "Sugar-Free"
+  ingredients RecipeIngredient[]
+}
+
+model RecipeIngredient {
+  id           Int         @id @default(autoincrement())
+  recipe       Recipe      @relation(fields: [recipeId], references: [id])
+  recipeId     Int
+  ingredient   Ingredient  @relation(fields: [ingredientId], references: [id])
+  ingredientId Int
+  quantity     Float       // how much of the ingredient is used in the recipe
+}
+
+model Sale {
+  id             Int       @id @default(autoincrement())
+  product        Product   @relation(fields: [productId], references: [id])
+  productId      Int
+  quantity       Int
+  date           DateTime  @default(now())
+  packagingType  String
+  variant        String
+  salePrice      Float
+  user           User      @relation(fields: [userId], references: [id])
+  userId         Int
+}
+
+model InventoryLog {
+  id            Int         @id @default(autoincrement())
+  ingredient    Ingredient  @relation(fields: [ingredientId], references: [id])
+  ingredientId  Int
+  change        Float
+  reason        String
+  timestamp     DateTime    @default(now())
+  user          User        @relation(fields: [userId], references: [id])
+  userId        Int
+}
+
+model Packaging {
+  id           Int     @id @default(autoincrement())
+  type         String  // e.g., "8oz Paper Cup", "330ml Can"
+  costPerUnit  Float
+}
+
+model User {
+  id         Int       @id @default(autoincrement())
+  name       String
+  email      String    @unique
+  password   String    // store hashed passwords only!
+  role       UserRole  @default(BARISTA)
+  sales      Sale[]    // user who performed the sale
+  inventoryLogs InventoryLog[] // user who updated inventory
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  BARISTA
+}

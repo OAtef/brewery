@@ -11,6 +11,7 @@ import {
   Select,
   MenuItem,
   Grid,
+  Alert,
 } from "@mui/material";
 
 export default function AddProductDialog({ open, onClose, onProductAdded }) {
@@ -19,6 +20,7 @@ export default function AddProductDialog({ open, onClose, onProductAdded }) {
     category: "",
   });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const categories = [
     "Espresso",
@@ -29,11 +31,11 @@ export default function AddProductDialog({ open, onClose, onProductAdded }) {
     "Specialty",
     "Pastry",
     "Sandwich",
-    "Other"
+    "Other",
   ];
 
   const handleInputChange = (field, value) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [field]: value,
     }));
@@ -44,8 +46,9 @@ export default function AddProductDialog({ open, onClose, onProductAdded }) {
     setLoading(true);
 
     try {
+      setError("");
       if (!formData.name || !formData.category) {
-        alert("Please fill in all required fields");
+        setError("Please fill in all required fields");
         return;
       }
 
@@ -60,12 +63,12 @@ export default function AddProductDialog({ open, onClose, onProductAdded }) {
         onProductAdded(newProduct);
         handleClose();
       } else {
-        const error = await res.json();
-        alert(`Error: ${error.error}`);
+        const errorData = await res.json();
+        setError(errorData.error || "Failed to create product");
       }
     } catch (error) {
       console.error("Failed to create product:", error);
-      alert("Failed to create product");
+      setError("Failed to create product");
     } finally {
       setLoading(false);
     }
@@ -84,8 +87,13 @@ export default function AddProductDialog({ open, onClose, onProductAdded }) {
       <DialogTitle>Add New Product</DialogTitle>
       <form onSubmit={handleSubmit}>
         <DialogContent>
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {error}
+            </Alert>
+          )}
           <Grid container spacing={2}>
-            <Grid item xs={12}>
+            <Grid item xs={12} sm={4}>
               <TextField
                 label="Product Name"
                 value={formData.name}
@@ -96,14 +104,19 @@ export default function AddProductDialog({ open, onClose, onProductAdded }) {
                 placeholder="e.g., Cappuccino, Croissant"
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={12} sm={8}>
               <FormControl fullWidth margin="normal">
-                <InputLabel>Category</InputLabel>
                 <Select
                   value={formData.category}
-                  onChange={(e) => handleInputChange("category", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("category", e.target.value)
+                  }
                   required
+                  displayEmpty
                 >
+                  <MenuItem value="" disabled>
+                    <em>Select Category</em>
+                  </MenuItem>
                   {categories.map((category) => (
                     <MenuItem key={category} value={category}>
                       {category}

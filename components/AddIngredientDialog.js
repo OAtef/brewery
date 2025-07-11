@@ -11,16 +11,10 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Box,
-  Typography,
-  Divider,
   ListSubheader,
 } from "@mui/material";
-import {
-  ALL_UNITS,
-  MEASUREMENT_UNITS,
-  getUnitsWithCategories,
-} from "../lib/units";
+import { getUnitsWithCategories } from "../lib/units";
+import PropTypes from "prop-types";
 
 export default function AddIngredientDialog({
   open,
@@ -146,3 +140,9 @@ export default function AddIngredientDialog({
     </Dialog>
   );
 }
+
+AddIngredientDialog.propTypes = {
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  refreshIngredients: PropTypes.func.isRequired,
+};
