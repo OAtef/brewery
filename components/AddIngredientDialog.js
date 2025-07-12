@@ -11,12 +11,10 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Box,
-  Typography,
-  Divider,
   ListSubheader,
 } from "@mui/material";
-import { ALL_UNITS, MEASUREMENT_UNITS, getUnitsWithCategories } from "../lib/units";
+import { getUnitsWithCategories } from "../lib/units";
+import PropTypes from "prop-types";
 
 export default function AddIngredientDialog({
   open,
@@ -32,6 +30,20 @@ export default function AddIngredientDialog({
   const handleSubmit = async () => {
     setError("");
     try {
+      // Check if ingredient name already exists
+      const checkNameResponse = await fetch(
+        `/api/ingredient/checkName?name=${name}`
+      );
+      if (!checkNameResponse.ok) {
+        throw new Error("Failed to check ingredient name");
+      }
+      const { exists } = await checkNameResponse.json();
+
+      if (exists) {
+        setError("Ingredient with this name already exists");
+        return;
+      }
+
       const response = await fetch("/api/ingredient", {
         method: "POST",
         headers: {
@@ -92,7 +104,7 @@ export default function AddIngredientDialog({
                 <MenuItem key={unitOption.value} value={unitOption.value}>
                   {unitOption.label}
                 </MenuItem>
-              ))
+              )),
             ])}
           </Select>
         </FormControl>
@@ -128,3 +140,9 @@ export default function AddIngredientDialog({
     </Dialog>
   );
 }
+
+AddIngredientDialog.propTypes = {
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  refreshIngredients: PropTypes.func.isRequired,
+};

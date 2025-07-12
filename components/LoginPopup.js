@@ -88,14 +88,14 @@ export default function LoginPopup({ open, onClose }) {
     try {
       if (isLogin) {
         // Login logic
-        try {
-          await login(formData.email, formData.password);
+        const result = await login(formData.email, formData.password);
+        if (result.success) {
           setSuccess("Login successful!");
           setTimeout(() => {
             onClose();
           }, 1500);
-        } catch (err) {
-          setError(err.message || "An error occurred");
+        } else {
+          setError(result.error || "An error occurred");
         }
       } else {
         // Signup logic

@@ -14,28 +14,36 @@ import {
   Typography,
   Box,
   Grid,
+  Alert,
 } from "@mui/material";
 import { Add as AddIcon, Delete as DeleteIcon } from "@mui/icons-material";
 import { getUnitDisplayText } from "../lib/units";
 
-export default function EditRecipeDialog({ open, onClose, recipe, onRecipeUpdated }) {
+export default function EditRecipeDialog({
+  open,
+  onClose,
+  recipe,
+  onRecipeUpdated,
+}) {
   const [formData, setFormData] = useState({
     variant: "",
     ingredients: [{ ingredientId: "", quantity: "" }],
   });
   const [ingredients, setIngredients] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (open && recipe) {
       setFormData({
         variant: recipe.variant || "",
-        ingredients: recipe.ingredients?.length > 0 
-          ? recipe.ingredients.map(ri => ({
-              ingredientId: ri.ingredientId.toString(),
-              quantity: ri.quantity.toString(),
-            }))
-          : [{ ingredientId: "", quantity: "" }],
+        ingredients:
+          recipe.ingredients?.length > 0
+            ? recipe.ingredients.map((ri) => ({
+                ingredientId: ri.ingredientId.toString(),
+                quantity: ri.quantity.toString(),
+              }))
+            : [{ ingredientId: "", quantity: "" }],
       });
       fetchIngredients();
     }
@@ -47,14 +55,17 @@ export default function EditRecipeDialog({ open, onClose, recipe, onRecipeUpdate
       if (res.ok) {
         const data = await res.json();
         setIngredients(data);
+      } else {
+        throw new Error("Failed to fetch ingredients");
       }
     } catch (error) {
+      setError(error.message || "Failed to fetch ingredients");
       console.error("Failed to fetch ingredients:", error);
     }
   };
 
   const handleInputChange = (field, value) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [field]: value,
     }));
@@ -66,14 +77,14 @@ export default function EditRecipeDialog({ open, onClose, recipe, onRecipeUpdate
       ...updatedIngredients[index],
       [field]: value,
     };
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       ingredients: updatedIngredients,
     }));
   };
 
   const addIngredient = () => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       ingredients: [...prev.ingredients, { ingredientId: "", quantity: "" }],
     }));
@@ -81,8 +92,10 @@ export default function EditRecipeDialog({ open, onClose, recipe, onRecipeUpdate
 
   const removeIngredient = (index) => {
     if (formData.ingredients.length > 1) {
-      const updatedIngredients = formData.ingredients.filter((_, i) => i !== index);
-      setFormData(prev => ({
+      const updatedIngredients = formData.ingredients.filter(
+        (_, i) => i !== index
+      );
+      setFormData((prev) => ({
         ...prev,
         ingredients: updatedIngredients,
       }));
@@ -94,18 +107,19 @@ export default function EditRecipeDialog({ open, onClose, recipe, onRecipeUpdate
     setLoading(true);
 
     try {
+      setError("");
       // Validate form
       if (!formData.variant) {
-        alert("Please fill in all required fields");
+        setError("Please fill in all required fields");
         return;
       }
 
       const validIngredients = formData.ingredients.filter(
-        ing => ing.ingredientId && ing.quantity
+        (ing) => ing.ingredientId && ing.quantity
       );
 
       if (validIngredients.length === 0) {
-        alert("Please add at least one ingredient");
+        setError("Please add at least one ingredient");
         return;
       }
 
@@ -114,7 +128,7 @@ export default function EditRecipeDialog({ open, onClose, recipe, onRecipeUpdate
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           variant: formData.variant,
-          ingredients: validIngredients.map(ing => ({
+          ingredients: validIngredients.map((ing) => ({
             ingredientId: parseInt(ing.ingredientId),
             quantity: parseFloat(ing.quantity),
           })),
@@ -126,12 +140,12 @@ export default function EditRecipeDialog({ open, onClose, recipe, onRecipeUpdate
         onRecipeUpdated(updatedRecipe);
         onClose();
       } else {
-        const error = await res.json();
-        alert(`Error: ${error.error}`);
+        const errorData = await res.json();
+        setError(errorData.error || "Failed to update recipe");
       }
     } catch (error) {
       console.error("Failed to update recipe:", error);
-      alert("Failed to update recipe");
+      setError("Failed to update recipe");
     } finally {
       setLoading(false);
     }
@@ -146,6 +160,11 @@ export default function EditRecipeDialog({ open, onClose, recipe, onRecipeUpdate
       </DialogTitle>
       <form onSubmit={handleSubmit}>
         <DialogContent>
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {error}
+            </Alert>
+          )}
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <TextField
@@ -165,12 +184,21 @@ export default function EditRecipeDialog({ open, onClose, recipe, onRecipeUpdate
               Ingredients
             </Typography>
             {formData.ingredients.map((ingredient, index) => (
-              <Box key={index} sx={{ display: "flex", gap: 1, mb: 2, alignItems: "center" }}>
+              <Box
+                key={index}
+                sx={{ display: "flex", gap: 1, mb: 2, alignItems: "center" }}
+              >
                 <FormControl sx={{ minWidth: 200 }}>
                   <InputLabel>Ingredient</InputLabel>
                   <Select
                     value={ingredient.ingredientId}
-                    onChange={(e) => handleIngredientChange(index, "ingredientId", e.target.value)}
+                    onChange={(e) =>
+                      handleIngredientChange(
+                        index,
+                        "ingredientId",
+                        e.target.value
+                      )
+                    }
                     required
                   >
                     {ingredients.map((ing) => (
@@ -184,7 +212,9 @@ export default function EditRecipeDialog({ open, onClose, recipe, onRecipeUpdate
                   label="Quantity"
                   type="number"
                   value={ingredient.quantity}
-                  onChange={(e) => handleIngredientChange(index, "quantity", e.target.value)}
+                  onChange={(e) =>
+                    handleIngredientChange(index, "quantity", e.target.value)
+                  }
                   sx={{ width: 120 }}
                   inputProps={{ min: 0, step: 0.1 }}
                   required

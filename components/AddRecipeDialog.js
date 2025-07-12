@@ -15,6 +15,7 @@ import {
   Box,
   Grid,
   Autocomplete,
+  Alert,
 } from "@mui/material";
 import { Add as AddIcon, Delete as DeleteIcon } from "@mui/icons-material";
 import { getUnitDisplayText } from "../lib/units";
@@ -28,6 +29,7 @@ export default function AddRecipeDialog({ open, onClose, onRecipeAdded }) {
   const [products, setProducts] = useState([]);
   const [ingredients, setIngredients] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (open) {
@@ -42,8 +44,11 @@ export default function AddRecipeDialog({ open, onClose, onRecipeAdded }) {
       if (res.ok) {
         const data = await res.json();
         setProducts(data);
+      } else {
+        throw new Error("Failed to fetch products");
       }
     } catch (error) {
+      setError(error.message || "Failed to fetch products");
       console.error("Failed to fetch products:", error);
     }
   };
@@ -54,14 +59,17 @@ export default function AddRecipeDialog({ open, onClose, onRecipeAdded }) {
       if (res.ok) {
         const data = await res.json();
         setIngredients(data);
+      } else {
+        throw new Error("Failed to fetch ingredients");
       }
     } catch (error) {
+      setError(error.message || "Failed to fetch ingredients");
       console.error("Failed to fetch ingredients:", error);
     }
   };
 
   const handleInputChange = (field, value) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [field]: value,
     }));
@@ -73,14 +81,14 @@ export default function AddRecipeDialog({ open, onClose, onRecipeAdded }) {
       ...updatedIngredients[index],
       [field]: value,
     };
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       ingredients: updatedIngredients,
     }));
   };
 
   const addIngredient = () => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       ingredients: [...prev.ingredients, { ingredientId: "", quantity: "" }],
     }));
@@ -88,8 +96,10 @@ export default function AddRecipeDialog({ open, onClose, onRecipeAdded }) {
 
   const removeIngredient = (index) => {
     if (formData.ingredients.length > 1) {
-      const updatedIngredients = formData.ingredients.filter((_, i) => i !== index);
-      setFormData(prev => ({
+      const updatedIngredients = formData.ingredients.filter(
+        (_, i) => i !== index
+      );
+      setFormData((prev) => ({
         ...prev,
         ingredients: updatedIngredients,
       }));
@@ -101,18 +111,19 @@ export default function AddRecipeDialog({ open, onClose, onRecipeAdded }) {
     setLoading(true);
 
     try {
+      setError("");
       // Validate form
       if (!formData.productId || !formData.variant) {
-        alert("Please fill in all required fields");
+        setError("Please fill in all required fields");
         return;
       }
 
       const validIngredients = formData.ingredients.filter(
-        ing => ing.ingredientId && ing.quantity
+        (ing) => ing.ingredientId && ing.quantity
       );
 
       if (validIngredients.length === 0) {
-        alert("Please add at least one ingredient");
+        setError("Please add at least one ingredient");
         return;
       }
 
@@ -122,7 +133,7 @@ export default function AddRecipeDialog({ open, onClose, onRecipeAdded }) {
         body: JSON.stringify({
           productId: parseInt(formData.productId),
           variant: formData.variant,
-          ingredients: validIngredients.map(ing => ({
+          ingredients: validIngredients.map((ing) => ({
             ingredientId: parseInt(ing.ingredientId),
             quantity: parseFloat(ing.quantity),
           })),
@@ -134,12 +145,12 @@ export default function AddRecipeDialog({ open, onClose, onRecipeAdded }) {
         onRecipeAdded(newRecipe);
         handleClose();
       } else {
-        const error = await res.json();
-        alert(`Error: ${error.error}`);
+        const errorData = await res.json();
+        setError(errorData.error || "Failed to create recipe");
       }
     } catch (error) {
       console.error("Failed to create recipe:", error);
-      alert("Failed to create recipe");
+      setError("Failed to create recipe");
     } finally {
       setLoading(false);
     }
@@ -159,15 +170,25 @@ export default function AddRecipeDialog({ open, onClose, onRecipeAdded }) {
       <DialogTitle>Add New Recipe</DialogTitle>
       <form onSubmit={handleSubmit}>
         <DialogContent>
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {error}
+            </Alert>
+          )}
           <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
+            <Grid item>
               <FormControl fullWidth margin="normal">
-                <InputLabel>Product</InputLabel>
                 <Select
                   value={formData.productId}
-                  onChange={(e) => handleInputChange("productId", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("productId", e.target.value)
+                  }
                   required
+                  displayEmpty
                 >
+                  <MenuItem value="" disabled>
+                    <em>Select Product</em>
+                  </MenuItem>
                   {products.map((product) => (
                     <MenuItem key={product.id} value={product.id}>
                       {product.name} ({product.category})
@@ -176,7 +197,7 @@ export default function AddRecipeDialog({ open, onClose, onRecipeAdded }) {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid item>
               <TextField
                 label="Variant"
                 value={formData.variant}
@@ -194,12 +215,21 @@ export default function AddRecipeDialog({ open, onClose, onRecipeAdded }) {
               Ingredients
             </Typography>
             {formData.ingredients.map((ingredient, index) => (
-              <Box key={index} sx={{ display: "flex", gap: 1, mb: 2, alignItems: "center" }}>
+              <Box
+                key={index}
+                sx={{ display: "flex", gap: 1, mb: 2, alignItems: "center" }}
+              >
                 <FormControl sx={{ minWidth: 200 }}>
                   <InputLabel>Ingredient</InputLabel>
                   <Select
                     value={ingredient.ingredientId}
-                    onChange={(e) => handleIngredientChange(index, "ingredientId", e.target.value)}
+                    onChange={(e) =>
+                      handleIngredientChange(
+                        index,
+                        "ingredientId",
+                        e.target.value
+                      )
+                    }
                     required
                   >
                     {ingredients.map((ing) => (
@@ -213,7 +243,9 @@ export default function AddRecipeDialog({ open, onClose, onRecipeAdded }) {
                   label="Quantity"
                   type="number"
                   value={ingredient.quantity}
-                  onChange={(e) => handleIngredientChange(index, "quantity", e.target.value)}
+                  onChange={(e) =>
+                    handleIngredientChange(index, "quantity", e.target.value)
+                  }
                   sx={{ width: 120 }}
                   inputProps={{ min: 0, step: 0.1 }}
                   required
