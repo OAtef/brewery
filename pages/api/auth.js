@@ -13,13 +13,22 @@ export default async function handler(req, res) {
     const { action, name, email, password, role } = req.body;
 
     if (action === "register") {
+      // Check if user already exists
+      const existingUser = await prisma.user.findUnique({
+        where: { email },
+      });
+
+      if (existingUser) {
+        return res.status(409).json({ error: "User already exists" });
+      }
       // Create a new user
       try {
+        const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = await prisma.user.create({
           data: {
             name: name || "User",
             email,
-            password, // In a real app, you'd hash the password
+            password: hashedPassword,
             role: role || "USER", // Default role to USER if not provided
           },
           select: {
