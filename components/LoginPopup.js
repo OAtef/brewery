@@ -16,11 +16,9 @@ import {
   Select,
   MenuItem,
 } from "@mui/material";
-import { useRouter } from "next/router";
 import { useAuth } from "../lib/auth";
 
 export default function LoginPopup({ open, onClose }) {
-  const router = useRouter();
   const { login } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);

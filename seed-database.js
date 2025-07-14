@@ -4,10 +4,45 @@ async function seedDatabase() {
   const prisma = new PrismaClient();
   
   try {
-    console.log('🌱 Seeding database with initial data...\n');
+    console.log('🌱 Checking database state and seeding if needed...\n');
+
+    // Always ensure admin user exists
+    console.log('1. Ensuring admin user exists...');
+    const bcrypt = require('bcryptjs');
+    const hashedPassword = await bcrypt.hash('admin123', 10);
+    
+    const adminUser = await prisma.user.upsert({
+      where: { email: 'admin@coffeeshop.com' },
+      update: {
+        name: 'Admin User',
+        password: hashedPassword,
+        role: 'ADMIN',
+      },
+      create: {
+        name: 'Admin User',
+        email: 'admin@coffeeshop.com',
+        password: hashedPassword,
+        role: 'ADMIN',
+      },
+    });
+    console.log(`✅ Admin user ready: ${adminUser.email} (password: admin123)`);
+
+    // Check if database already has sample data
+    const existingIngredients = await prisma.ingredient.count();
+    if (existingIngredients > 0) {
+      console.log(`\n📦 Database already contains ${existingIngredients} ingredients. Skipping sample data creation.`);
+      console.log('\n✅ Database check complete!');
+      console.log('\nYou can now:');
+      console.log('- Login with admin@coffeeshop.com / admin123');
+      console.log('- Access Recipe Management at /recipes');
+      console.log('- View and manage products and recipes');
+      return;
+    }
+
+    console.log('\n📝 Database is empty. Creating sample data...');
 
     // Create ingredients first
-    console.log('1. Creating ingredients...');
+    console.log('2. Creating ingredients...');
     const ingredients = await Promise.all([
       prisma.ingredient.create({
         data: {
@@ -200,21 +235,6 @@ async function seedDatabase() {
     });
 
     console.log(`✅ Created 4 recipes with ingredients`);
-
-    // Create a test user
-    console.log('\n4. Creating test user...');
-    const bcrypt = require('bcryptjs');
-    const hashedPassword = await bcrypt.hash('admin123', 10);
-    
-    const testUser = await prisma.user.create({
-      data: {
-        name: 'Admin User',
-        email: 'admin@coffeeshop.com',
-        password: hashedPassword,
-        role: 'ADMIN',
-      },
-    });
-    console.log(`✅ Created test user: ${testUser.email} (password: admin123)`);
 
     console.log('\n🎉 Database seeded successfully!');
     console.log('\nYou can now:');

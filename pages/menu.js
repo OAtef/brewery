@@ -209,7 +209,7 @@ export default function MenuPage() {
             🍰 Coming Soon!
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
-            We're working on bringing you delicious desserts and fresh bakery items.
+            We&apos;re working on bringing you delicious desserts and fresh bakery items.
           </Typography>
           <Typography variant="body2" color="text.secondary">
             Expect croissants, muffins, cookies, cakes, and other sweet treats to complement your coffee experience.
@@ -225,7 +225,7 @@ export default function MenuPage() {
             Coffee Menu Coming Soon!
           </Typography>
           <Typography variant="body1" color="text.secondary">
-            We're brewing up something special. Check back soon for our amazing coffee drinks and bakery items.
+            We&apos;re brewing up something special. Check back soon for our amazing coffee drinks and bakery items.
           </Typography>
         </Box>
       )}

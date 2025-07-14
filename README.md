@@ -5,13 +5,17 @@ A modern inventory management system built for coffee shops to track orders, sto
 ## 🚀 Features
 
 - **Role-based Authentication** (Admin, Manager, Barista)
+- **Protected Routes** - Role-based access control for sensitive pages
 - **Inventory Management** - Track ingredients, stock levels, and costs
-- **3D Coffee Shop Scene** - Interactive Three.js experience
+- **Standardized Units** - Dropdown selection with validated measurement units
+- **Public Menu** - Customer-facing menu showing only drinks with dessert/bakery placeholders
+- **3D Coffee Shop Scene** - Interactive Three.js experience (role-restricted)
 - **Real-time Updates** - Live inventory tracking
 - **Audit Logging** - Complete inventory change history
-- **Responsive Design** - Material-UI components
-- **Recipe Management** - Define how products are made
+- **Responsive Design** - Material-UI components with authentication-aware navigation
+- **Recipe Management** - Define how products are made with standardized units
 - **Sales Tracking** - Transaction recording system
+- **Comprehensive Testing** - Full test coverage for authentication, components, and business logic
 
 ## 🛠 Tech Stack
 
@@ -304,3 +308,30 @@ If you encounter any issues:
 ---
 
 **Happy coding! ☕️**
+
+## ✅ RECENT FIXES
+
+### MUI Dependency Issue ✅ RESOLVED
+- **Issue**: `deepmerge is not a function` error during build with MUI v7.x
+- **Solution**: Downgraded to stable MUI v5.15.x packages  
+- **Changes**: Updated to compatible versions that work with Next.js 15
+  - `@mui/material`: v7.1.1 → v5.15.x
+  - `@mui/icons-material`: v7.1.1 → v5.15.x
+  - `@emotion/react`: v11.14.0 → v11.11.x
+  - `@emotion/styled`: v11.14.0 → v11.11.x
+
+### SSR Router Issues ✅ RESOLVED
+- **Issue**: `NextRouter was not mounted` errors during build/prerendering  
+- **Solution**: Eliminated all SSR router dependencies across the application
+- **Changes**: 
+  - Updated auth context to use `window.location` instead of `useRouter` for logout
+  - Created client-side wrapper for ProtectedRoute component
+  - Added `getServerSideProps` to protected pages to disable static generation
+  - **Fixed home page**: Replaced `useRouter` with `window.location` navigation
+  - **Fixed LoginPopup**: Removed unused `useRouter` import
+  - All pages now build successfully without SSR conflicts
+
+### ESLint Issues ✅ RESOLVED  
+- **Issue**: `react/no-unescaped-entities` errors for apostrophes
+- **Solution**: Escaped apostrophes using `&apos;` HTML entity
+- **Files Fixed**: `menu.js`, `ProtectedRoute.js`

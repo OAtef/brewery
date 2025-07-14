@@ -122,3 +122,10 @@ export default function DebugMenu() {
     </Container>
   );
 }
+
+// Disable static generation for this page to avoid SSR issues
+export async function getServerSideProps() {
+  return {
+    props: {},
+  };
+}

@@ -13,13 +13,12 @@ import {
 import CoffeeIcon from "@mui/icons-material/Coffee";
 import LocalCafeIcon from "@mui/icons-material/LocalCafe";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
-import { useRouter } from "next/router";
 
 export default function Home() {
-  const router = useRouter();
-
   const handleViewMenu = () => {
-    router.push('/menu');
+    if (typeof window !== 'undefined') {
+      window.location.href = '/menu';
+    }
   };
 
   return (

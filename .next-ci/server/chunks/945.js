@@ -1,1 +1,0 @@
-"use strict";exports.id=945,exports.ids=[945],exports.modules={6945:(t,e,r)=>{r.a(t,async(t,s)=>{try{r.r(e),r.d(e,{default:()=>l});var a=r(8732),u=r(2015),d=r(3070),i=r(130),n=r(9762),c=t([d,i,n]);function l(){let t=(0,u.useRef)(null);return(0,a.jsx)("div",{ref:t})}[d,i,n]=c.then?(await c)():c,s()}catch(t){s(t)}})}};

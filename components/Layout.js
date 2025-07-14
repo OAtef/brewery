@@ -1,5 +1,5 @@
 // components/Layout.js
-import { AppBar, Toolbar, Typography, Button, Container } from "@mui/material";
+import { AppBar, Toolbar, Typography, Button, Container, Box } from "@mui/material";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import LoginPopup from "./LoginPopup";
@@ -7,6 +7,7 @@ import { useAuth } from "../lib/auth"; // Assuming auth context is in lib/auth.j
 
 export default function Layout({ children }) {
   const [loginOpen, setLoginOpen] = useState(false);
+  const { user, logout } = useAuth(); // Get user and logout function from auth context
 
   const handleLoginOpen = () => {
     setLoginOpen(true);
@@ -15,6 +16,11 @@ export default function Layout({ children }) {
   const handleLoginClose = () => {
     setLoginOpen(false);
   };
+
+  const handleLogout = () => {
+    logout();
+  };
+
   return (
     <>
       <AppBar position="static" color="primary">
@@ -24,29 +30,52 @@ export default function Layout({ children }) {
               The Brewery
             </Link>
           </Typography>
-          <Button color="inherit" component={Link} href="/scene">
-            3D Scene
+          
+          {/* Always visible links for everyone */}
+          <Button color="inherit" component={Link} href="/">
+            Dashboard
           </Button>
           <Button color="inherit" component={Link} href="/menu">
             Menu
           </Button>
-          <Button color="inherit" component={Link} href="/dashboard">
-            Dashboard
-          </Button>
-          {/* Admin/Manager Only Features */}
-          {(useAuth().user?.role === "ADMIN" || useAuth().user?.role === "MANAGER") && (
+          
+          {/* Links only visible when logged in */}
+          {user && (
             <>
-              <Button color="inherit" component={Link} href="/inventory">
-                Inventory
+              <Button color="inherit" component={Link} href="/scene">
+                3D Scene
               </Button>
-              <Button color="inherit" component={Link} href="/recipes">
-                Recipes
-              </Button>
+              
+              {/* Admin/Manager Only Features */}
+              {(user.role === "ADMIN" || user.role === "MANAGER") && (
+                <>
+                  <Button color="inherit" component={Link} href="/inventory">
+                    Inventory
+                  </Button>
+                  <Button color="inherit" component={Link} href="/recipes">
+                    Recipes
+                  </Button>
+                </>
+              )}
             </>
           )}
-          <Button color="inherit" onClick={handleLoginOpen}>
-            Login
-          </Button>
+          
+          {/* Authentication section */}
+          {user ? (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography variant="body2" sx={{ color: 'white', mr: 1 }}>
+                Welcome, {user.name}
+              </Typography>
+              <Button color="inherit" onClick={handleLogout}>
+                Logout
+              </Button>
+            </Box>
+          ) : (
+            <Button color="inherit" onClick={handleLoginOpen}>
+              Login
+            </Button>
+          )}
+          
           <LoginPopup open={loginOpen} onClose={handleLoginClose} />
         </Toolbar>
       </AppBar>
