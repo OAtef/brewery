@@ -31,6 +31,7 @@ model Product {
   category    String       // e.g., "Espresso", "Can", "Specialty"
   recipes     Recipe[]
   sales       Sale[]
+  orders      OrderProduct[]
 }
 
 model Recipe {
@@ -75,9 +76,11 @@ model InventoryLog {
 }
 
 model Packaging {
-  id           Int     @id @default(autoincrement())
-  type         String  // e.g., "8oz Paper Cup", "330ml Can"
-  costPerUnit  Float
+  id            Int            @id @default(autoincrement())
+  type          String         @unique
+  costPerUnit   Float
+  currentStock  Float
+  orderProducts OrderProduct[]
 }
 
 model User {
@@ -88,6 +91,7 @@ model User {
   role       UserRole  @default(BARISTA)
   sales      Sale[]    // user who performed the sale
   inventoryLogs InventoryLog[] // user who updated inventory
+  orders     Order[]   // user who created the order
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
 }
@@ -96,4 +100,38 @@ enum UserRole {
   ADMIN
   MANAGER
   BARISTA
+}
+
+model Client {
+  id                Int     @id @default(autoincrement())
+  client_number     String  @unique
+  name              String
+  address           String
+  application_used  String
+  orders            Order[]
+}
+
+model Order {
+  id          Int            @id @default(autoincrement())
+  client      Client         @relation(fields: [clientId], references: [id])
+  clientId    Int
+  user        User           @relation(fields: [userId], references: [id])
+  userId      Int
+  createdAt   DateTime       @default(now())
+  application String
+  total       Float
+  promoCode   String?
+  products    OrderProduct[]
+}
+
+model OrderProduct {
+  order       Order     @relation(fields: [orderId], references: [id])
+  orderId     Int
+  product     Product   @relation(fields: [productId], references: [id])
+  productId   Int
+  quantity    Int
+  packaging   Packaging @relation(fields: [packagingId], references: [id])
+  packagingId Int
+
+  @@id([orderId, productId, packagingId])
 }

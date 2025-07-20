@@ -8,6 +8,7 @@ export default function ThreeScene() {
   const mountRef = useRef(null);
 
   useEffect(() => {
+    const currentMount = mountRef.current;
     const scene = new THREE.Scene();
 
     // Camera setup
@@ -23,7 +24,7 @@ export default function ThreeScene() {
     // Renderer setup
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    mountRef.current.appendChild(renderer.domElement);
+    currentMount.appendChild(renderer.domElement);
 
     // Add light so we can see the model
     const ambientLight = new THREE.AmbientLight(0xffffff, 4);
@@ -111,7 +112,7 @@ export default function ThreeScene() {
     animate();
 
     return () => {
-      mountRef.current.removeChild(renderer.domElement);
+      currentMount.removeChild(renderer.domElement);
     };
   }, []);
 
