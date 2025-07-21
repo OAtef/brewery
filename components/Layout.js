@@ -1,5 +1,12 @@
 // components/Layout.js
-import { AppBar, Toolbar, Typography, Button, Container, Box } from "@mui/material";
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Button,
+  Container,
+  Box,
+} from "@mui/material";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import LoginPopup from "./LoginPopup";
@@ -30,7 +37,7 @@ export default function Layout({ children }) {
               The Brewery
             </Link>
           </Typography>
-          
+
           {/* Always visible links for everyone */}
           <Button color="inherit" component={Link} href="/">
             Dashboard
@@ -38,14 +45,14 @@ export default function Layout({ children }) {
           <Button color="inherit" component={Link} href="/menu">
             Menu
           </Button>
-          
+
           {/* Links only visible when logged in */}
           {user && (
             <>
               <Button color="inherit" component={Link} href="/scene">
                 3D Scene
               </Button>
-              
+
               {/* Admin/Manager Only Features */}
               {(user.role === "ADMIN" || user.role === "MANAGER") && (
                 <>
@@ -57,13 +64,16 @@ export default function Layout({ children }) {
                   </Button>
                 </>
               )}
+              <Button color="inherit" component={Link} href="/orders/new">
+                Create Order
+              </Button>
             </>
           )}
-          
+
           {/* Authentication section */}
           {user ? (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Typography variant="body2" sx={{ color: 'white', mr: 1 }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <Typography variant="body2" sx={{ color: "white", mr: 1 }}>
                 Welcome, {user.name}
               </Typography>
               <Button color="inherit" onClick={handleLogout}>
@@ -75,7 +85,7 @@ export default function Layout({ children }) {
               Login
             </Button>
           )}
-          
+
           <LoginPopup open={loginOpen} onClose={handleLoginClose} />
         </Toolbar>
       </AppBar>
