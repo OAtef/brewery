@@ -15,9 +15,10 @@ import LocalCafeIcon from "@mui/icons-material/LocalCafe";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 
 export default function Home() {
+  console.log("Component: Home");
   const handleViewMenu = () => {
-    if (typeof window !== 'undefined') {
-      window.location.href = '/menu';
+    if (typeof window !== "undefined") {
+      window.location.href = "/menu";
     }
   };
 
@@ -69,7 +70,8 @@ export default function Home() {
               </Typography>
               <Typography variant="body1" color="text.secondary">
                 Experience the finest coffee in a cozy atmosphere. We source our
-                beans from sustainable farms and are preparing fresh bakery items daily.
+                beans from sustainable farms and are preparing fresh bakery
+                items daily.
               </Typography>
               <Button
                 variant="contained"

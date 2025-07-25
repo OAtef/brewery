@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import {
   Container,
   Typography,
@@ -17,12 +17,13 @@ import {
   Alert,
   IconButton,
   Divider,
-} from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
-import LocalCafeIcon from '@mui/icons-material/LocalCafe';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+} from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import LocalCafeIcon from "@mui/icons-material/LocalCafe";
+import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 
 export default function MenuPage() {
+  console.log("Component: MenuPage");
   const [recipes, setRecipes] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -35,34 +36,40 @@ export default function MenuPage() {
     const fetchMenuData = async () => {
       try {
         setLoading(true);
-        
+
         // Fetch recipes (coffee drinks)
-        const recipesResponse = await fetch('/api/recipes');
+        const recipesResponse = await fetch("/api/recipes");
         const recipesData = await recipesResponse.json();
-        
+
         // Fetch products (coffee beans, equipment)
-        const productsResponse = await fetch('/api/products');
+        const productsResponse = await fetch("/api/products");
         const productsData = await productsResponse.json();
-        
+
         if (recipesResponse.ok) {
           // API returns direct array, not wrapped in object
-          console.log('Recipes response:', recipesData);
+          console.log("Recipes response:", recipesData);
           setRecipes(Array.isArray(recipesData) ? recipesData : []);
         }
-        
+
         if (productsResponse.ok) {
           // API returns direct array, not wrapped in object
-          console.log('Products response:', productsData);
+          console.log("Products response:", productsData);
           setProducts(Array.isArray(productsData) ? productsData : []);
         }
-        
-        console.log('Final state - recipes:', Array.isArray(recipesData) ? recipesData.length : 0);
-        console.log('Final state - products:', Array.isArray(productsData) ? productsData.length : 0);
-        
+
+        console.log(
+          "Final state - recipes:",
+          Array.isArray(recipesData) ? recipesData.length : 0
+        );
+        console.log(
+          "Final state - products:",
+          Array.isArray(productsData) ? productsData.length : 0
+        );
+
         setLoading(false);
       } catch (err) {
-        console.error('Error fetching menu data:', err);
-        setError('Failed to load menu. Please try again later.');
+        console.error("Error fetching menu data:", err);
+        setError("Failed to load menu. Please try again later.");
         setLoading(false);
       }
     };
@@ -82,7 +89,7 @@ export default function MenuPage() {
 
   if (loading) {
     return (
-      <Container maxWidth="lg" sx={{ mt: 4, textAlign: 'center' }}>
+      <Container maxWidth="lg" sx={{ mt: 4, textAlign: "center" }}>
         <CircularProgress size={60} />
         <Typography variant="h6" sx={{ mt: 2 }}>
           Loading our delicious menu...
@@ -104,7 +111,9 @@ export default function MenuPage() {
       {/* Header */}
       <Box textAlign="center" mb={4}>
         <Typography variant="h3" component="h1" gutterBottom color="primary">
-          <LocalCafeIcon sx={{ fontSize: 40, mr: 1, verticalAlign: 'middle' }} />
+          <LocalCafeIcon
+            sx={{ fontSize: 40, mr: 1, verticalAlign: "middle" }}
+          />
           Coffee & Bakery Menu
         </Typography>
         <Typography variant="h6" color="text.secondary">
@@ -113,77 +122,87 @@ export default function MenuPage() {
       </Box>
 
       {/* Coffee Drinks Section */}
-      {products.filter(product => ['Espresso', 'Coffee'].includes(product.category)).length > 0 && (
+      {products.filter((product) =>
+        ["Espresso", "Coffee"].includes(product.category)
+      ).length > 0 && (
         <Box mb={6}>
           <Typography variant="h4" component="h2" gutterBottom sx={{ mb: 3 }}>
             ☕ Coffee Drinks
           </Typography>
           <Grid container spacing={3}>
             {products
-              .filter(product => ['Espresso', 'Coffee'].includes(product.category))
+              .filter((product) =>
+                ["Espresso", "Coffee"].includes(product.category)
+              )
               .map((product) => (
-              <Grid item xs={12} sm={6} md={4} key={product.id}>
-                <Card 
-                  elevation={3} 
-                  sx={{ 
-                    height: '100%', 
-                    cursor: 'pointer',
-                    transition: 'transform 0.2s, box-shadow 0.2s',
-                    '&:hover': {
-                      transform: 'translateY(-4px)',
-                      boxShadow: 6,
-                    }
-                  }}
-                  onClick={() => handleItemClick(product, 'drink')}
-                >
-                  <CardContent>
-                    <Typography variant="h5" component="h3" gutterBottom>
-                      {product.name}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                      {product.category} - A delicious coffee creation
-                    </Typography>
-                    
-                    {/* Recipes/Variants Preview */}
-                    <Box sx={{ mb: 2 }}>
-                      <Typography variant="subtitle2" gutterBottom>
-                        Available variants:
+                <Grid item xs={12} sm={6} md={4} key={product.id}>
+                  <Card
+                    elevation={3}
+                    sx={{
+                      height: "100%",
+                      cursor: "pointer",
+                      transition: "transform 0.2s, box-shadow 0.2s",
+                      "&:hover": {
+                        transform: "translateY(-4px)",
+                        boxShadow: 6,
+                      },
+                    }}
+                    onClick={() => handleItemClick(product, "drink")}
+                  >
+                    <CardContent>
+                      <Typography variant="h5" component="h3" gutterBottom>
+                        {product.name}
                       </Typography>
-                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                        {product.recipes?.slice(0, 3).map((recipe, index) => (
-                          <Chip
-                            key={index}
-                            label={recipe.variant}
-                            size="small"
-                            variant="outlined"
-                          />
-                        ))}
-                        {product.recipes?.length > 3 && (
-                          <Chip
-                            label={`+${product.recipes.length - 3} more`}
-                            size="small"
-                            variant="outlined"
-                            color="primary"
-                          />
-                        )}
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ mb: 2 }}
+                      >
+                        {product.category} - A delicious coffee creation
+                      </Typography>
+
+                      {/* Recipes/Variants Preview */}
+                      <Box sx={{ mb: 2 }}>
+                        <Typography variant="subtitle2" gutterBottom>
+                          Available variants:
+                        </Typography>
+                        <Box
+                          sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}
+                        >
+                          {product.recipes?.slice(0, 3).map((recipe, index) => (
+                            <Chip
+                              key={index}
+                              label={recipe.variant}
+                              size="small"
+                              variant="outlined"
+                            />
+                          ))}
+                          {product.recipes?.length > 3 && (
+                            <Chip
+                              label={`+${product.recipes.length - 3} more`}
+                              size="small"
+                              variant="outlined"
+                              color="primary"
+                            />
+                          )}
+                        </Box>
                       </Box>
-                    </Box>
-                    
-                    <Button
-                      variant="outlined"
-                      color="primary"
-                      size="small"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleItemClick(product, 'drink');
-                      }}
-                    >
-                      View Recipes
-                    </Button>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
+
+                      <Button
+                        variant="outlined"
+                        color="primary"
+                        size="small"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleItemClick(product, "drink");
+                        }}
+                      >
+                        View Recipes
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
           </Grid>
         </Box>
       )}
@@ -193,39 +212,46 @@ export default function MenuPage() {
         <Typography variant="h4" component="h2" gutterBottom sx={{ mb: 3 }}>
           🧁 Desserts & Bakery
         </Typography>
-        
+
         {/* Coming Soon Placeholder */}
-        <Box 
-          sx={{ 
-            textAlign: 'center', 
-            py: 6, 
-            bgcolor: 'background.default', 
+        <Box
+          sx={{
+            textAlign: "center",
+            py: 6,
+            bgcolor: "background.default",
             borderRadius: 2,
-            border: '2px dashed',
-            borderColor: 'primary.main'
+            border: "2px dashed",
+            borderColor: "primary.main",
           }}
         >
           <Typography variant="h5" gutterBottom color="primary">
             🍰 Coming Soon!
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
-            We&apos;re working on bringing you delicious desserts and fresh bakery items.
+            We&apos;re working on bringing you delicious desserts and fresh
+            bakery items.
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Expect croissants, muffins, cookies, cakes, and other sweet treats to complement your coffee experience.
+            Expect croissants, muffins, cookies, cakes, and other sweet treats
+            to complement your coffee experience.
           </Typography>
         </Box>
       </Box>
 
       {/* Empty State */}
-      {products.filter(product => ['Espresso', 'Coffee'].includes(product.category)).length === 0 && (
+      {products.filter((product) =>
+        ["Espresso", "Coffee"].includes(product.category)
+      ).length === 0 && (
         <Box textAlign="center" py={8}>
-          <LocalCafeIcon sx={{ fontSize: 80, color: 'text.secondary', mb: 2 }} />
+          <LocalCafeIcon
+            sx={{ fontSize: 80, color: "text.secondary", mb: 2 }}
+          />
           <Typography variant="h5" gutterBottom>
             Coffee Menu Coming Soon!
           </Typography>
           <Typography variant="body1" color="text.secondary">
-            We&apos;re brewing up something special. Check back soon for our amazing coffee drinks and bakery items.
+            We&apos;re brewing up something special. Check back soon for our
+            amazing coffee drinks and bakery items.
           </Typography>
         </Box>
       )}
@@ -238,10 +264,12 @@ export default function MenuPage() {
         fullWidth
       >
         <DialogTitle>
-          <Box display="flex" justifyContent="space-between" alignItems="center">
-            <Typography variant="h5">
-              {selectedItem?.name}
-            </Typography>
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Typography variant="h5">{selectedItem?.name}</Typography>
             <IconButton onClick={handleCloseDialog}>
               <CloseIcon />
             </IconButton>
@@ -251,18 +279,24 @@ export default function MenuPage() {
           {selectedItem && (
             <Box>
               <Typography variant="body1" paragraph>
-                {selectedItem.description || 'A wonderful addition to our menu.'}
+                {selectedItem.description ||
+                  "A wonderful addition to our menu."}
               </Typography>
-              
+
               <Divider sx={{ my: 2 }} />
-              
-              {selectedItem.type === 'drink' && selectedItem.recipes && (
+
+              {selectedItem.type === "drink" && selectedItem.recipes && (
                 <Box mb={3}>
                   <Typography variant="h6" gutterBottom>
                     Available Recipes:
                   </Typography>
                   {selectedItem.recipes.map((recipe, index) => (
-                    <Box key={index} mb={2} p={2} sx={{ bgcolor: 'background.default', borderRadius: 1 }}>
+                    <Box
+                      key={index}
+                      mb={2}
+                      p={2}
+                      sx={{ bgcolor: "background.default", borderRadius: 1 }}
+                    >
                       <Typography variant="subtitle1" gutterBottom>
                         <strong>{recipe.variant}</strong>
                       </Typography>
@@ -288,8 +322,8 @@ export default function MenuPage() {
                   ))}
                 </Box>
               )}
-              
-              {selectedItem.type === 'recipe' && selectedItem.ingredients && (
+
+              {selectedItem.type === "recipe" && selectedItem.ingredients && (
                 <Box mb={3}>
                   <Typography variant="h6" gutterBottom>
                     Ingredients:
@@ -307,13 +341,13 @@ export default function MenuPage() {
                   </Grid>
                 </Box>
               )}
-              
-              {selectedItem.type === 'recipe' && selectedItem.instructions && (
+
+              {selectedItem.type === "recipe" && selectedItem.instructions && (
                 <Box mb={3}>
                   <Typography variant="h6" gutterBottom>
                     Instructions:
                   </Typography>
-                  <Typography variant="body2" sx={{ whiteSpace: 'pre-line' }}>
+                  <Typography variant="body2" sx={{ whiteSpace: "pre-line" }}>
                     {selectedItem.instructions}
                   </Typography>
                 </Box>

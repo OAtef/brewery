@@ -89,9 +89,7 @@ export default function LoginPopup({ open, onClose }) {
         const result = await login(formData.email, formData.password);
         if (result.success) {
           setSuccess("Login successful!");
-          setTimeout(() => {
-            onClose();
-          }, 1500);
+          onClose();
         } else {
           setError(result.error || "An error occurred");
         }

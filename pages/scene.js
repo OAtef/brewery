@@ -19,6 +19,7 @@ const ThreeScene = dynamic(() => import("../components/ThreeScene"), {
 });
 
 export default function ScenePage() {
+  console.log("Component: ScenePage");
   return (
     <ClientProtectedRoute>
       <Container maxWidth="lg" sx={{ mt: 4 }}>

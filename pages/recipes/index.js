@@ -2,8 +2,9 @@ import RecipeManagement from "../../components/RecipeManagement";
 import ClientProtectedRoute from "../../components/ClientProtectedRoute";
 
 export default function RecipesPage() {
+  console.log("Component: RecipesPage");
   return (
-    <ClientProtectedRoute allowedRoles={['ADMIN', 'MANAGER']}>
+    <ClientProtectedRoute allowedRoles={["ADMIN", "MANAGER"]}>
       <RecipeManagement />
     </ClientProtectedRoute>
   );

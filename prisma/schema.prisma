@@ -15,14 +15,15 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 model Ingredient {
-  id               Int              @id @default(autoincrement())
-  name             String
-  unit             String           // e.g., "g", "ml", "piece"
-  costPerUnit      Float
-  currentStock     Float
-  wastePercentage  Float            // e.g., 0.1 for 10%
+  id                Int                @id @default(autoincrement())
+  name              String
+  unit              String // e.g., "g", "ml", "piece"
+  costPerUnit       Float
+  currentStock      Float
+  wastePercentage   Float // e.g., 0.1 for 10%
   recipeIngredients RecipeIngredient[]
-  inventoryLogs    InventoryLog[]
+  inventoryLogs     InventoryLog[]
+  isDeleted         Boolean            @default(false)
 }
 
 model Product {
