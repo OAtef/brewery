@@ -10,8 +10,9 @@ import {
   TextField,
   Box,
   IconButton,
+  Drawer,
 } from "@mui/material";
-import { Add, Remove } from "@mui/icons-material";
+import { Add, ShoppingCart } from "@mui/icons-material";
 import { useSelector, useDispatch } from "react-redux";
 import {
   addProduct,
@@ -20,6 +21,8 @@ import {
 } from "../../lib/redux/cartSlice";
 import { useAuth } from "../../lib/auth";
 import { useRouter } from "next/router";
+import VariantSelector from "../../components/VariantSelector";
+import CartDrawer from "../../components/CartDrawer";
 
 export default function NewOrder() {
   const [products, setProducts] = useState([]);
@@ -29,6 +32,10 @@ export default function NewOrder() {
     address: "",
     application_used: "waiter",
   });
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [isVariantSelectorOpen, setIsVariantSelectorOpen] = useState(false);
+  const [isCartDrawerOpen, setIsCartDrawerOpen] = useState(false);
+
   const cart = useSelector((state) => state.cart.products);
   const dispatch = useDispatch();
   const { user } = useAuth();
@@ -47,17 +54,26 @@ export default function NewOrder() {
     setClientData({ ...clientData, [e.target.name]: e.target.value });
   };
 
-  const handleAddToCart = (product) => {
-    dispatch(addProduct(product));
+  const handleOpenVariantSelector = (product) => {
+    setSelectedProduct(product);
   };
 
-  const handleRemoveFromCart = (product) => {
-    dispatch(removeProduct(product));
+  useEffect(() => {
+    if (selectedProduct) {
+      console.log("Selected product:", selectedProduct);
+
+      setIsVariantSelectorOpen(true);
+    }
+  }, [selectedProduct]);
+
+  const handleCloseVariantSelector = () => {
+    setSelectedProduct(null);
+    setIsVariantSelectorOpen(false);
   };
 
-  const getProductQuantity = (productId) => {
-    const product = cart.find((p) => p.id === productId);
-    return product ? product.quantity : 0;
+  const handleVariantSelect = (variant) => {
+    dispatch(addProduct({ product: selectedProduct, variant }));
+    handleCloseVariantSelector();
   };
 
   const handleSubmitOrder = async () => {
@@ -76,7 +92,7 @@ export default function NewOrder() {
       products: cart.map((p) => ({
         productId: p.id,
         quantity: p.quantity,
-        packagingId: 1, // Default packaging for now
+        packagingId: p.variant.id,
       })),
       userId: user.id,
       application: "waiter",
@@ -116,9 +132,25 @@ export default function NewOrder() {
 
   return (
     <Container>
-      <Typography variant="h4" gutterBottom>
-        Create New Order
-      </Typography>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 4,
+        }}
+      >
+        <Typography variant="h4" gutterBottom>
+          Create New Order
+        </Typography>
+        <IconButton color="primary" onClick={() => setIsCartDrawerOpen(true)}>
+          <ShoppingCart />
+        </IconButton>
+      </Box>
+      <CartDrawer
+        open={isCartDrawerOpen}
+        onClose={() => setIsCartDrawerOpen(false)}
+      />
       <Box component="form" noValidate autoComplete="off" sx={{ mb: 4 }}>
         <Typography variant="h6" gutterBottom>
           Client Information
@@ -174,17 +206,10 @@ export default function NewOrder() {
                   {product.category}
                 </Typography>
               </CardContent>
-              <CardActions>
-                <IconButton
-                  aria-label="remove from cart"
-                  onClick={() => handleRemoveFromCart(product)}
-                >
-                  <Remove />
-                </IconButton>
-                <Typography>{getProductQuantity(product.id)}</Typography>
+              <CardActions sx={{ justifyContent: "center" }}>
                 <IconButton
                   aria-label="add to cart"
-                  onClick={() => handleAddToCart(product)}
+                  onClick={() => handleOpenVariantSelector(product)}
                 >
                   <Add />
                 </IconButton>
@@ -193,6 +218,14 @@ export default function NewOrder() {
           </Grid>
         ))}
       </Grid>
+      {selectedProduct && (
+        <VariantSelector
+          open={isVariantSelectorOpen}
+          onClose={handleCloseVariantSelector}
+          productId={selectedProduct.id}
+          onSelect={handleVariantSelect}
+        />
+      )}
       <Box sx={{ mt: 4, display: "flex", justifyContent: "flex-end" }}>
         <Button variant="contained" color="primary" onClick={handleSubmitOrder}>
           Submit Order

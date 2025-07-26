@@ -291,11 +291,11 @@ export default function MenuPage() {
                     Available Recipes:
                   </Typography>
                   {selectedItem.recipes.map((recipe, index) => (
-                    <Box
+                    <Card
                       key={index}
                       mb={2}
                       p={2}
-                      sx={{ bgcolor: "background.default", borderRadius: 1 }}
+                      sx={{ bgcolor: "background.paper", borderRadius: 3 }}
                     >
                       <Typography variant="subtitle1" gutterBottom>
                         <strong>{recipe.variant}</strong>
@@ -318,7 +318,7 @@ export default function MenuPage() {
                           </Grid>
                         </Box>
                       )}
-                    </Box>
+                    </Card>
                   ))}
                 </Box>
               )}

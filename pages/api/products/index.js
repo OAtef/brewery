@@ -27,7 +27,9 @@ export default async function handler(req, res) {
       const { name, category } = req.body;
 
       if (!name || !category) {
-        return res.status(400).json({ error: "Name and category are required" });
+        return res
+          .status(400)
+          .json({ error: "Name and category are required" });
       }
 
       const product = await prisma.product.create({
