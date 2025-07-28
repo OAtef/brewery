@@ -21,7 +21,7 @@ import {
 } from "../../lib/redux/cartSlice";
 import { useAuth } from "../../lib/auth";
 import { useRouter } from "next/router";
-import VariantSelector from "../../components/VariantSelector";
+import ProductSelector from "../../components/ProductSelector";
 import CartDrawer from "../../components/CartDrawer";
 
 export default function NewOrder() {
@@ -33,7 +33,7 @@ export default function NewOrder() {
     application_used: "waiter",
   });
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [isVariantSelectorOpen, setIsVariantSelectorOpen] = useState(false);
+  const [isProductSelectorOpen, setIsProductSelectorOpen] = useState(false);
   const [isCartDrawerOpen, setIsCartDrawerOpen] = useState(false);
 
   const cart = useSelector((state) => state.cart.products);
@@ -54,26 +54,30 @@ export default function NewOrder() {
     setClientData({ ...clientData, [e.target.name]: e.target.value });
   };
 
-  const handleOpenVariantSelector = (product) => {
+  const handleOpenProductSelector = (product) => {
     setSelectedProduct(product);
   };
 
   useEffect(() => {
     if (selectedProduct) {
       console.log("Selected product:", selectedProduct);
-
-      setIsVariantSelectorOpen(true);
+      setIsProductSelectorOpen(true);
     }
   }, [selectedProduct]);
 
-  const handleCloseVariantSelector = () => {
+  const handleCloseProductSelector = () => {
     setSelectedProduct(null);
-    setIsVariantSelectorOpen(false);
+    setIsProductSelectorOpen(false);
   };
 
-  const handleVariantSelect = (variant) => {
-    dispatch(addProduct({ product: selectedProduct, variant }));
-    handleCloseVariantSelector();
+  const handleProductSelect = (selection) => {
+    dispatch(addProduct({ 
+      product: selectedProduct, 
+      variant: selection.variant,
+      packaging: selection.packaging,
+      price: selection.price
+    }));
+    handleCloseProductSelector();
   };
 
   const handleSubmitOrder = async () => {
@@ -91,21 +95,14 @@ export default function NewOrder() {
       client: clientData,
       products: cart.map((p) => ({
         productId: p.id,
+        recipeId: p.variant?.id,
         quantity: p.quantity,
-        packagingId: p.variant.id,
+        unitPrice: p.unitPrice,
+        packagingId: p.packaging?.id,
       })),
       userId: user.id,
       application: "waiter",
-      total: cart.reduce(
-        (acc, p) =>
-          acc +
-          p.recipes[0].ingredients.reduce(
-            (acc, i) => acc + i.ingredient.costPerUnit * i.quantity,
-            0
-          ) *
-            p.quantity,
-        0
-      ),
+      total: cart.reduce((acc, p) => acc + (p.unitPrice * p.quantity), 0),
     };
 
     try {
@@ -209,7 +206,7 @@ export default function NewOrder() {
               <CardActions sx={{ justifyContent: "center" }}>
                 <IconButton
                   aria-label="add to cart"
-                  onClick={() => handleOpenVariantSelector(product)}
+                  onClick={() => handleOpenProductSelector(product)}
                 >
                   <Add />
                 </IconButton>
@@ -219,11 +216,11 @@ export default function NewOrder() {
         ))}
       </Grid>
       {selectedProduct && (
-        <VariantSelector
-          open={isVariantSelectorOpen}
-          onClose={handleCloseVariantSelector}
+        <ProductSelector
+          open={isProductSelectorOpen}
+          onClose={handleCloseProductSelector}
           productId={selectedProduct.id}
-          onSelect={handleVariantSelect}
+          onSelect={handleProductSelect}
         />
       )}
       <Box sx={{ mt: 4, display: "flex", justifyContent: "flex-end" }}>

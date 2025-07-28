@@ -93,30 +93,38 @@ async function seedDatabase() {
     console.log(`✅ Created ${ingredients.length} ingredients`);
 
     // Create products
-    console.log('\n2. Creating products...');
+    console.log('\n3. Creating products...');
     const products = await Promise.all([
       prisma.product.create({
         data: {
           name: 'Cappuccino',
           category: 'Espresso',
+          basePrice: 4.50,
+          description: 'Rich espresso with steamed milk and foam',
         },
       }),
       prisma.product.create({
         data: {
           name: 'Latte',
           category: 'Espresso',
+          basePrice: 4.75,
+          description: 'Smooth espresso with steamed milk',
         },
       }),
       prisma.product.create({
         data: {
           name: 'Americano',
           category: 'Coffee',
+          basePrice: 3.50,
+          description: 'Rich espresso with hot water',
         },
       }),
       prisma.product.create({
         data: {
           name: 'Espresso',
           category: 'Espresso',
+          basePrice: 2.50,
+          description: 'Pure, concentrated coffee shot',
         },
       }),
       // Retail products
@@ -124,123 +132,238 @@ async function seedDatabase() {
         data: {
           name: 'Ethiopian Coffee Beans',
           category: 'Beans',
+          basePrice: 15.99,
+          description: 'Premium Ethiopian single-origin beans',
         },
       }),
       prisma.product.create({
         data: {
           name: 'Colombian Coffee Beans',
           category: 'Beans',
+          basePrice: 14.99,
+          description: 'Smooth Colombian coffee beans',
         },
       }),
       prisma.product.create({
         data: {
           name: 'Coffee Grinder',
           category: 'Equipment',
+          basePrice: 89.99,
+          description: 'Professional burr coffee grinder',
         },
       }),
       prisma.product.create({
         data: {
           name: 'French Press',
           category: 'Equipment',
+          basePrice: 29.99,
+          description: 'Classic French press coffee maker',
         },
       }),
     ]);
     console.log(`✅ Created ${products.length} products (${products.filter(p => ['Espresso', 'Coffee'].includes(p.category)).length} drinks + ${products.filter(p => !['Espresso', 'Coffee'].includes(p.category)).length} retail products)`);
 
-    // Create recipes with ingredients
-    console.log('\n3. Creating recipes...');
+    // Create recipe variants for drink products
+    console.log('\n5. Creating recipe variants for drinks...');
     
-    // Cappuccino Regular
-    const cappuccinoRecipe = await prisma.recipe.create({
-      data: {
-        productId: products[0].id, // Cappuccino
-        variant: 'Regular',
-        ingredients: {
-          create: [
-            {
-              ingredientId: ingredients[0].id, // Espresso Shot
-              quantity: 30.0,
-            },
-            {
-              ingredientId: ingredients[1].id, // Milk
-              quantity: 120.0,
-            },
-            {
-              ingredientId: ingredients[2].id, // Milk Foam
-              quantity: 60.0,
-            },
-          ],
+    // Find the drink products
+    const cappuccino = products.find(p => p.name === 'Cappuccino');
+    const latte = products.find(p => p.name === 'Latte');
+    const americano = products.find(p => p.name === 'Americano');
+    const espresso = products.find(p => p.name === 'Espresso');
+
+    const recipes = await Promise.all([
+      // Cappuccino variants
+      prisma.recipe.create({
+        data: {
+          productId: cappuccino.id,
+          variant: 'Regular',
+          priceModifier: 0.00,
+          isActive: true,
         },
-      },
-    });
-
-    // Latte Regular
-    const latteRecipe = await prisma.recipe.create({
-      data: {
-        productId: products[1].id, // Latte
-        variant: 'Regular',
-        ingredients: {
-          create: [
-            {
-              ingredientId: ingredients[0].id, // Espresso Shot
-              quantity: 30.0,
-            },
-            {
-              ingredientId: ingredients[1].id, // Milk
-              quantity: 180.0,
-            },
-            {
-              ingredientId: ingredients[2].id, // Milk Foam
-              quantity: 30.0,
-            },
-          ],
+      }),
+      prisma.recipe.create({
+        data: {
+          productId: cappuccino.id,
+          variant: 'Decaf',
+          priceModifier: 0.00,
+          isActive: true,
         },
-      },
-    });
-
-    // Americano Regular
-    const americanoRecipe = await prisma.recipe.create({
-      data: {
-        productId: products[2].id, // Americano
-        variant: 'Regular',
-        ingredients: {
-          create: [
-            {
-              ingredientId: ingredients[0].id, // Espresso Shot
-              quantity: 60.0,
-            },
-            {
-              ingredientId: ingredients[3].id, // Hot Water
-              quantity: 120.0,
-            },
-          ],
+      }),
+      prisma.recipe.create({
+        data: {
+          productId: cappuccino.id,
+          variant: 'Extra Shot',
+          priceModifier: 0.75,
+          isActive: true,
         },
-      },
-    });
-
-    // Espresso Double Shot
-    const espressoRecipe = await prisma.recipe.create({
-      data: {
-        productId: products[3].id, // Espresso
-        variant: 'Double Shot',
-        ingredients: {
-          create: [
-            {
-              ingredientId: ingredients[0].id, // Espresso Shot
-              quantity: 60.0,
-            },
-          ],
+      }),
+      prisma.recipe.create({
+        data: {
+          productId: cappuccino.id,
+          variant: 'Oat Milk',
+          priceModifier: 0.50,
+          isActive: true,
         },
-      },
-    });
+      }),
 
-    console.log(`✅ Created 4 recipes with ingredients`);
+      // Latte variants
+      prisma.recipe.create({
+        data: {
+          productId: latte.id,
+          variant: 'Regular',
+          priceModifier: 0.00,
+          isActive: true,
+        },
+      }),
+      prisma.recipe.create({
+        data: {
+          productId: latte.id,
+          variant: 'Vanilla',
+          priceModifier: 0.60,
+          isActive: true,
+        },
+      }),
+      prisma.recipe.create({
+        data: {
+          productId: latte.id,
+          variant: 'Caramel',
+          priceModifier: 0.60,
+          isActive: true,
+        },
+      }),
+      prisma.recipe.create({
+        data: {
+          productId: latte.id,
+          variant: 'Almond Milk',
+          priceModifier: 0.50,
+          isActive: true,
+        },
+      }),
+      prisma.recipe.create({
+        data: {
+          productId: latte.id,
+          variant: 'Iced',
+          priceModifier: 0.00,
+          isActive: true,
+        },
+      }),
 
+      // Americano variants
+      prisma.recipe.create({
+        data: {
+          productId: americano.id,
+          variant: 'Regular',
+          priceModifier: 0.00,
+          isActive: true,
+        },
+      }),
+      prisma.recipe.create({
+        data: {
+          productId: americano.id,
+          variant: 'Iced',
+          priceModifier: 0.00,
+          isActive: true,
+        },
+      }),
+      prisma.recipe.create({
+        data: {
+          productId: americano.id,
+          variant: 'Extra Strong',
+          priceModifier: 0.50,
+          isActive: true,
+        },
+      }),
+
+      // Espresso variants
+      prisma.recipe.create({
+        data: {
+          productId: espresso.id,
+          variant: 'Single Shot',
+          priceModifier: 0.00,
+          isActive: true,
+        },
+      }),
+      prisma.recipe.create({
+        data: {
+          productId: espresso.id,
+          variant: 'Double Shot',
+          priceModifier: 1.00,
+          isActive: true,
+        },
+      }),
+      prisma.recipe.create({
+        data: {
+          productId: espresso.id,
+          variant: 'Lungo',
+          priceModifier: 0.25,
+          isActive: true,
+        },
+      }),
+    ]);
+
+    console.log(`✅ Created ${recipes.length} recipe variants for drinks`);
+
+    // Create packaging options
+    console.log('\n6. Creating packaging options...');
+    const packaging = await Promise.all([
+      prisma.packaging.upsert({
+        where: { type: 'Small Cup (8oz)' },
+        update: {},
+        create: {
+          type: 'Small Cup (8oz)',
+          costPerUnit: 0.15,
+          currentStock: 500,
+        },
+      }),
+      prisma.packaging.upsert({
+        where: { type: 'Medium Cup (12oz)' },
+        update: {},
+        create: {
+          type: 'Medium Cup (12oz)',
+          costPerUnit: 0.20,
+          currentStock: 500,
+        },
+      }),
+      prisma.packaging.upsert({
+        where: { type: 'Large Cup (16oz)' },
+        update: {},
+        create: {
+          type: 'Large Cup (16oz)',
+          costPerUnit: 0.25,
+          currentStock: 500,
+        },
+      }),
+      prisma.packaging.upsert({
+        where: { type: 'Takeaway Bag' },
+        update: {},
+        create: {
+          type: 'Takeaway Bag',
+          costPerUnit: 0.10,
+          currentStock: 200,
+        },
+      }),
+      prisma.packaging.upsert({
+        where: { type: 'Gift Box' },
+        update: {},
+        create: {
+          type: 'Gift Box',
+          costPerUnit: 2.50,
+          currentStock: 50,
+        },
+      }),
+    ]);
+    console.log(`✅ Created ${packaging.length} packaging options`);
+
+    // Create recipes with ingredients
+    console.log('\n5. Creating recipes...');
+    
     console.log('\n🎉 Database seeded successfully!');
     console.log('\nYou can now:');
     console.log('- Login with admin@coffeeshop.com / admin123');
-    console.log('- Access Recipe Management at /recipes');
-    console.log('- View and manage products and recipes');
+    console.log('- Create orders with product variants at /orders/new');
+    console.log('- Manage orders at /orders');
+    console.log('- View inventory at /inventory');
     
   } catch (error) {
     console.error('❌ Seeding failed:', error);

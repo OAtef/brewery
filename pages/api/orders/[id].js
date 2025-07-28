@@ -13,6 +13,7 @@ export default async function handler(req, res) {
           products: {
             include: {
               product: true,
+              recipe: true,
               packaging: true,
             },
           },
@@ -42,7 +43,9 @@ export default async function handler(req, res) {
                 deleteMany: {},
                 create: productsData.map((p) => ({
                   quantity: p.quantity,
+                  unitPrice: p.unitPrice,
                   product: { connect: { id: p.productId } },
+                  recipe: p.recipeId ? { connect: { id: p.recipeId } } : undefined,
                   packaging: { connect: { id: p.packagingId } },
                 })),
               }
@@ -53,6 +56,7 @@ export default async function handler(req, res) {
           products: {
             include: {
               product: true,
+              recipe: true,
               packaging: true,
             },
           },

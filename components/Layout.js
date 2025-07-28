@@ -64,6 +64,14 @@ export default function Layout({ children }) {
                   </Button>
                 </>
               )}
+              
+              {/* Staff Features */}
+              {(user.role === "ADMIN" || user.role === "MANAGER" || user.role === "BARISTA") && (
+                <Button color="inherit" component={Link} href="/orders">
+                  Orders
+                </Button>
+              )}
+              
               <Button color="inherit" component={Link} href="/orders/new">
                 Create Order
               </Button>

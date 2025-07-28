@@ -30,6 +30,9 @@ model Product {
   id          Int          @id @default(autoincrement())
   name        String
   category    String       // e.g., "Espresso", "Can", "Specialty"
+  basePrice   Float        @default(0.0) // Base selling price
+  description String?      // Product description
+  isActive    Boolean      @default(true) // Whether product is available for ordering
   recipes     Recipe[]
   sales       Sale[]
   orders      OrderProduct[]
@@ -40,7 +43,10 @@ model Recipe {
   product    Product             @relation(fields: [productId], references: [id])
   productId  Int
   variant    String              // e.g., "Vega", "Decaf", "Sugar-Free"
+  priceModifier Float            @default(0.0) // Additional price for this variant
+  isActive   Boolean             @default(true) // Whether this variant is available
   ingredients RecipeIngredient[]
+  orderProducts OrderProduct[]
 }
 
 model RecipeIngredient {
@@ -103,6 +109,15 @@ enum UserRole {
   BARISTA
 }
 
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PREPARING
+  READY
+  COMPLETED
+  CANCELLED
+}
+
 model Client {
   id                Int     @id @default(autoincrement())
   client_number     String  @unique
@@ -119,9 +134,12 @@ model Order {
   user        User           @relation(fields: [userId], references: [id])
   userId      Int
   createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
   application String
   total       Float
   promoCode   String?
+  status      OrderStatus    @default(PENDING)
+  notes       String?
   products    OrderProduct[]
 }
 
@@ -130,7 +148,10 @@ model OrderProduct {
   orderId     Int
   product     Product   @relation(fields: [productId], references: [id])
   productId   Int
+  recipe      Recipe?   @relation(fields: [recipeId], references: [id])
+  recipeId    Int?
   quantity    Int
+  unitPrice   Float     // Price per unit at time of order
   packaging   Packaging @relation(fields: [packagingId], references: [id])
   packagingId Int
 
