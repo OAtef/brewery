@@ -44,48 +44,100 @@ async function seedDatabase() {
     // Create ingredients first
     console.log('2. Creating ingredients...');
     const ingredients = await Promise.all([
+      // Coffee Base Ingredients
       prisma.ingredient.create({
         data: {
-          name: 'Espresso Shot',
-          unit: 'ml',
-          costPerUnit: 0.15,
-          currentStock: 1000.0,
-          wastePercentage: 0.05,
+          name: 'Coffee Beans (Espresso)',
+          unit: 'g',
+          costPerUnit: 0.045, // ~$45/kg premium coffee beans
+          currentStock: 5000.0,
+          wastePercentage: 0.03,
         },
       }),
       prisma.ingredient.create({
         data: {
-          name: 'Milk',
+          name: 'Water',
           unit: 'ml',
-          costPerUnit: 0.002,
-          currentStock: 5000.0,
+          costPerUnit: 0.0005, // Very low cost for filtered water
+          currentStock: 50000.0,
+          wastePercentage: 0.01,
+        },
+      }),
+      
+      // Milk Products
+      prisma.ingredient.create({
+        data: {
+          name: 'Whole Milk',
+          unit: 'ml',
+          costPerUnit: 0.0015, // ~$1.50/liter
+          currentStock: 10000.0,
           wastePercentage: 0.02,
         },
       }),
       prisma.ingredient.create({
         data: {
-          name: 'Milk Foam',
+          name: 'Oat Milk',
           unit: 'ml',
-          costPerUnit: 0.001,
+          costPerUnit: 0.004, // Premium alt milk ~$4/liter
           currentStock: 2000.0,
-          wastePercentage: 0.10,
+          wastePercentage: 0.03,
         },
       }),
       prisma.ingredient.create({
         data: {
-          name: 'Hot Water',
+          name: 'Almond Milk',
           unit: 'ml',
-          costPerUnit: 0.001,
-          currentStock: 10000.0,
+          costPerUnit: 0.0035, // ~$3.50/liter
+          currentStock: 2000.0,
+          wastePercentage: 0.03,
+        },
+      }),
+      
+      // Syrups and Flavorings
+      prisma.ingredient.create({
+        data: {
+          name: 'Vanilla Syrup',
+          unit: 'ml',
+          costPerUnit: 0.08, // ~$80/liter for quality syrup
+          currentStock: 500.0,
           wastePercentage: 0.01,
         },
       }),
       prisma.ingredient.create({
         data: {
+          name: 'Caramel Syrup',
+          unit: 'ml',
+          costPerUnit: 0.08,
+          currentStock: 500.0,
+          wastePercentage: 0.01,
+        },
+      }),
+      prisma.ingredient.create({
+        data: {
+          name: 'Chocolate Powder',
+          unit: 'g',
+          costPerUnit: 0.02, // ~$20/kg
+          currentStock: 1000.0,
+          wastePercentage: 0.02,
+        },
+      }),
+      
+      // Additional ingredients
+      prisma.ingredient.create({
+        data: {
           name: 'Sugar',
           unit: 'g',
-          costPerUnit: 0.01,
-          currentStock: 500.0,
+          costPerUnit: 0.002, // ~$2/kg
+          currentStock: 2000.0,
+          wastePercentage: 0.05,
+        },
+      }),
+      prisma.ingredient.create({
+        data: {
+          name: 'Cinnamon Powder',
+          unit: 'g',
+          costPerUnit: 0.15, // ~$150/kg for quality spice
+          currentStock: 100.0,
           wastePercentage: 0.05,
         },
       }),
@@ -99,23 +151,23 @@ async function seedDatabase() {
         data: {
           name: 'Cappuccino',
           category: 'Espresso',
-          basePrice: 4.50,
-          description: 'Rich espresso with steamed milk and foam',
+          basePrice: 0.0, // Will be calculated from ingredients
+          description: 'Rich espresso with steamed milk and thick foam',
         },
       }),
       prisma.product.create({
         data: {
           name: 'Latte',
           category: 'Espresso',
-          basePrice: 4.75,
-          description: 'Smooth espresso with steamed milk',
+          basePrice: 0.0, // Will be calculated from ingredients
+          description: 'Smooth espresso with steamed milk and light foam',
         },
       }),
       prisma.product.create({
         data: {
           name: 'Americano',
           category: 'Coffee',
-          basePrice: 3.50,
+          basePrice: 0.0, // Will be calculated from ingredients
           description: 'Rich espresso with hot water',
         },
       }),
@@ -123,8 +175,24 @@ async function seedDatabase() {
         data: {
           name: 'Espresso',
           category: 'Espresso',
-          basePrice: 2.50,
+          basePrice: 0.0, // Will be calculated from ingredients
           description: 'Pure, concentrated coffee shot',
+        },
+      }),
+      prisma.product.create({
+        data: {
+          name: 'Mocha',
+          category: 'Espresso',
+          basePrice: 0.0, // Will be calculated from ingredients
+          description: 'Espresso with chocolate, steamed milk and foam',
+        },
+      }),
+      prisma.product.create({
+        data: {
+          name: 'Flat White',
+          category: 'Espresso',
+          basePrice: 0.0, // Will be calculated from ingredients
+          description: 'Double espresso with microfoam steamed milk',
         },
       }),
       // Retail products
@@ -164,145 +232,323 @@ async function seedDatabase() {
     console.log(`✅ Created ${products.length} products (${products.filter(p => ['Espresso', 'Coffee'].includes(p.category)).length} drinks + ${products.filter(p => !['Espresso', 'Coffee'].includes(p.category)).length} retail products)`);
 
     // Create recipe variants for drink products
-    console.log('\n5. Creating recipe variants for drinks...');
+    console.log('\n5. Creating recipe variants with ingredients...');
     
-    // Find the drink products
+    // Find ingredients for easy reference
+    const coffeeBeans = ingredients.find(i => i.name === 'Coffee Beans (Espresso)');
+    const water = ingredients.find(i => i.name === 'Water');
+    const wholeMilk = ingredients.find(i => i.name === 'Whole Milk');
+    const oatMilk = ingredients.find(i => i.name === 'Oat Milk');
+    const almondMilk = ingredients.find(i => i.name === 'Almond Milk');
+    const vanillaSyrup = ingredients.find(i => i.name === 'Vanilla Syrup');
+    const caramelSyrup = ingredients.find(i => i.name === 'Caramel Syrup');
+    const chocolatePowder = ingredients.find(i => i.name === 'Chocolate Powder');
+    const sugar = ingredients.find(i => i.name === 'Sugar');
+    const cinnamon = ingredients.find(i => i.name === 'Cinnamon Powder');
+
+    // Find drink products
     const cappuccino = products.find(p => p.name === 'Cappuccino');
     const latte = products.find(p => p.name === 'Latte');
     const americano = products.find(p => p.name === 'Americano');
     const espresso = products.find(p => p.name === 'Espresso');
+    const mocha = products.find(p => p.name === 'Mocha');
+    const flatWhite = products.find(p => p.name === 'Flat White');
 
-    const recipes = await Promise.all([
-      // Cappuccino variants
-      prisma.recipe.create({
-        data: {
-          productId: cappuccino.id,
-          variant: 'Regular',
-          priceModifier: 0.00,
-          isActive: true,
-        },
-      }),
-      prisma.recipe.create({
-        data: {
-          productId: cappuccino.id,
-          variant: 'Decaf',
-          priceModifier: 0.00,
-          isActive: true,
-        },
-      }),
-      prisma.recipe.create({
-        data: {
-          productId: cappuccino.id,
-          variant: 'Extra Shot',
-          priceModifier: 0.75,
-          isActive: true,
-        },
-      }),
-      prisma.recipe.create({
-        data: {
-          productId: cappuccino.id,
-          variant: 'Oat Milk',
-          priceModifier: 0.50,
-          isActive: true,
-        },
-      }),
+    const recipes = [];
 
-      // Latte variants
-      prisma.recipe.create({
-        data: {
-          productId: latte.id,
-          variant: 'Regular',
-          priceModifier: 0.00,
-          isActive: true,
+    // CAPPUCCINO RECIPES (1:1:1 ratio - espresso:steamed milk:foam)
+    recipes.push(await prisma.recipe.create({
+      data: {
+        productId: cappuccino.id,
+        variant: 'Regular',
+        priceModifier: 0.00,
+        isActive: true,
+        ingredients: {
+          create: [
+            { ingredientId: coffeeBeans.id, quantity: 18.0 }, // 18g beans for double shot
+            { ingredientId: water.id, quantity: 60.0 }, // 60ml for double espresso
+            { ingredientId: wholeMilk.id, quantity: 150.0 }, // 150ml milk (100ml steamed + 50ml foam)
+          ],
         },
-      }),
-      prisma.recipe.create({
-        data: {
-          productId: latte.id,
-          variant: 'Vanilla',
-          priceModifier: 0.60,
-          isActive: true,
-        },
-      }),
-      prisma.recipe.create({
-        data: {
-          productId: latte.id,
-          variant: 'Caramel',
-          priceModifier: 0.60,
-          isActive: true,
-        },
-      }),
-      prisma.recipe.create({
-        data: {
-          productId: latte.id,
-          variant: 'Almond Milk',
-          priceModifier: 0.50,
-          isActive: true,
-        },
-      }),
-      prisma.recipe.create({
-        data: {
-          productId: latte.id,
-          variant: 'Iced',
-          priceModifier: 0.00,
-          isActive: true,
-        },
-      }),
+      },
+    }));
 
-      // Americano variants
-      prisma.recipe.create({
-        data: {
-          productId: americano.id,
-          variant: 'Regular',
-          priceModifier: 0.00,
-          isActive: true,
+    recipes.push(await prisma.recipe.create({
+      data: {
+        productId: cappuccino.id,
+        variant: 'Decaf',
+        priceModifier: 0.00,
+        isActive: true,
+        ingredients: {
+          create: [
+            { ingredientId: coffeeBeans.id, quantity: 18.0 }, // Same amount, decaf beans
+            { ingredientId: water.id, quantity: 60.0 },
+            { ingredientId: wholeMilk.id, quantity: 150.0 },
+          ],
         },
-      }),
-      prisma.recipe.create({
-        data: {
-          productId: americano.id,
-          variant: 'Iced',
-          priceModifier: 0.00,
-          isActive: true,
-        },
-      }),
-      prisma.recipe.create({
-        data: {
-          productId: americano.id,
-          variant: 'Extra Strong',
-          priceModifier: 0.50,
-          isActive: true,
-        },
-      }),
+      },
+    }));
 
-      // Espresso variants
-      prisma.recipe.create({
-        data: {
-          productId: espresso.id,
-          variant: 'Single Shot',
-          priceModifier: 0.00,
-          isActive: true,
+    recipes.push(await prisma.recipe.create({
+      data: {
+        productId: cappuccino.id,
+        variant: 'Extra Shot',
+        priceModifier: 0.50, // Premium for extra coffee
+        isActive: true,
+        ingredients: {
+          create: [
+            { ingredientId: coffeeBeans.id, quantity: 27.0 }, // Triple shot
+            { ingredientId: water.id, quantity: 90.0 },
+            { ingredientId: wholeMilk.id, quantity: 150.0 },
+          ],
         },
-      }),
-      prisma.recipe.create({
-        data: {
-          productId: espresso.id,
-          variant: 'Double Shot',
-          priceModifier: 1.00,
-          isActive: true,
-        },
-      }),
-      prisma.recipe.create({
-        data: {
-          productId: espresso.id,
-          variant: 'Lungo',
-          priceModifier: 0.25,
-          isActive: true,
-        },
-      }),
-    ]);
+      },
+    }));
 
-    console.log(`✅ Created ${recipes.length} recipe variants for drinks`);
+    recipes.push(await prisma.recipe.create({
+      data: {
+        productId: cappuccino.id,
+        variant: 'Oat Milk',
+        priceModifier: 0.60, // Premium for alt milk
+        isActive: true,
+        ingredients: {
+          create: [
+            { ingredientId: coffeeBeans.id, quantity: 18.0 },
+            { ingredientId: water.id, quantity: 60.0 },
+            { ingredientId: oatMilk.id, quantity: 150.0 },
+          ],
+        },
+      },
+    }));
+
+    // LATTE RECIPES (1:3 ratio - espresso:steamed milk with minimal foam)
+    recipes.push(await prisma.recipe.create({
+      data: {
+        productId: latte.id,
+        variant: 'Regular',
+        priceModifier: 0.00,
+        isActive: true,
+        ingredients: {
+          create: [
+            { ingredientId: coffeeBeans.id, quantity: 18.0 },
+            { ingredientId: water.id, quantity: 60.0 },
+            { ingredientId: wholeMilk.id, quantity: 180.0 }, // More milk, less foam
+          ],
+        },
+      },
+    }));
+
+    recipes.push(await prisma.recipe.create({
+      data: {
+        productId: latte.id,
+        variant: 'Vanilla',
+        priceModifier: 0.75,
+        isActive: true,
+        ingredients: {
+          create: [
+            { ingredientId: coffeeBeans.id, quantity: 18.0 },
+            { ingredientId: water.id, quantity: 60.0 },
+            { ingredientId: wholeMilk.id, quantity: 180.0 },
+            { ingredientId: vanillaSyrup.id, quantity: 15.0 }, // 15ml syrup
+          ],
+        },
+      },
+    }));
+
+    recipes.push(await prisma.recipe.create({
+      data: {
+        productId: latte.id,
+        variant: 'Caramel',
+        priceModifier: 0.75,
+        isActive: true,
+        ingredients: {
+          create: [
+            { ingredientId: coffeeBeans.id, quantity: 18.0 },
+            { ingredientId: water.id, quantity: 60.0 },
+            { ingredientId: wholeMilk.id, quantity: 180.0 },
+            { ingredientId: caramelSyrup.id, quantity: 15.0 },
+          ],
+        },
+      },
+    }));
+
+    recipes.push(await prisma.recipe.create({
+      data: {
+        productId: latte.id,
+        variant: 'Almond Milk',
+        priceModifier: 0.60,
+        isActive: true,
+        ingredients: {
+          create: [
+            { ingredientId: coffeeBeans.id, quantity: 18.0 },
+            { ingredientId: water.id, quantity: 60.0 },
+            { ingredientId: almondMilk.id, quantity: 180.0 },
+          ],
+        },
+      },
+    }));
+
+    // AMERICANO RECIPES (1:2 ratio - espresso:hot water)
+    recipes.push(await prisma.recipe.create({
+      data: {
+        productId: americano.id,
+        variant: 'Regular',
+        priceModifier: 0.00,
+        isActive: true,
+        ingredients: {
+          create: [
+            { ingredientId: coffeeBeans.id, quantity: 18.0 },
+            { ingredientId: water.id, quantity: 180.0 }, // 60ml espresso + 120ml hot water
+          ],
+        },
+      },
+    }));
+
+    recipes.push(await prisma.recipe.create({
+      data: {
+        productId: americano.id,
+        variant: 'Long Shot',
+        priceModifier: 0.25,
+        isActive: true,
+        ingredients: {
+          create: [
+            { ingredientId: coffeeBeans.id, quantity: 18.0 },
+            { ingredientId: water.id, quantity: 240.0 }, // More water for milder taste
+          ],
+        },
+      },
+    }));
+
+    recipes.push(await prisma.recipe.create({
+      data: {
+        productId: americano.id,
+        variant: 'Extra Strong',
+        priceModifier: 0.50,
+        isActive: true,
+        ingredients: {
+          create: [
+            { ingredientId: coffeeBeans.id, quantity: 27.0 }, // Triple shot
+            { ingredientId: water.id, quantity: 150.0 },
+          ],
+        },
+      },
+    }));
+
+    // ESPRESSO RECIPES
+    recipes.push(await prisma.recipe.create({
+      data: {
+        productId: espresso.id,
+        variant: 'Single Shot',
+        priceModifier: 0.00,
+        isActive: true,
+        ingredients: {
+          create: [
+            { ingredientId: coffeeBeans.id, quantity: 9.0 }, // 9g for single shot
+            { ingredientId: water.id, quantity: 30.0 }, // 30ml output
+          ],
+        },
+      },
+    }));
+
+    recipes.push(await prisma.recipe.create({
+      data: {
+        productId: espresso.id,
+        variant: 'Double Shot',
+        priceModifier: 0.75,
+        isActive: true,
+        ingredients: {
+          create: [
+            { ingredientId: coffeeBeans.id, quantity: 18.0 },
+            { ingredientId: water.id, quantity: 60.0 },
+          ],
+        },
+      },
+    }));
+
+    recipes.push(await prisma.recipe.create({
+      data: {
+        productId: espresso.id,
+        variant: 'Lungo',
+        priceModifier: 0.25,
+        isActive: true,
+        ingredients: {
+          create: [
+            { ingredientId: coffeeBeans.id, quantity: 18.0 },
+            { ingredientId: water.id, quantity: 90.0 }, // Longer extraction
+          ],
+        },
+      },
+    }));
+
+    // MOCHA RECIPES
+    recipes.push(await prisma.recipe.create({
+      data: {
+        productId: mocha.id,
+        variant: 'Regular',
+        priceModifier: 0.00,
+        isActive: true,
+        ingredients: {
+          create: [
+            { ingredientId: coffeeBeans.id, quantity: 18.0 },
+            { ingredientId: water.id, quantity: 60.0 },
+            { ingredientId: wholeMilk.id, quantity: 150.0 },
+            { ingredientId: chocolatePowder.id, quantity: 15.0 }, // 15g chocolate
+          ],
+        },
+      },
+    }));
+
+    recipes.push(await prisma.recipe.create({
+      data: {
+        productId: mocha.id,
+        variant: 'Dark Chocolate',
+        priceModifier: 0.50,
+        isActive: true,
+        ingredients: {
+          create: [
+            { ingredientId: coffeeBeans.id, quantity: 18.0 },
+            { ingredientId: water.id, quantity: 60.0 },
+            { ingredientId: wholeMilk.id, quantity: 150.0 },
+            { ingredientId: chocolatePowder.id, quantity: 20.0 }, // More chocolate
+          ],
+        },
+      },
+    }));
+
+    // FLAT WHITE RECIPES
+    recipes.push(await prisma.recipe.create({
+      data: {
+        productId: flatWhite.id,
+        variant: 'Regular',
+        priceModifier: 0.00,
+        isActive: true,
+        ingredients: {
+          create: [
+            { ingredientId: coffeeBeans.id, quantity: 18.0 }, // Double shot
+            { ingredientId: water.id, quantity: 60.0 },
+            { ingredientId: wholeMilk.id, quantity: 120.0 }, // Less milk than latte, microfoam
+          ],
+        },
+      },
+    }));
+
+    recipes.push(await prisma.recipe.create({
+      data: {
+        productId: flatWhite.id,
+        variant: 'Oat Milk',
+        priceModifier: 0.60,
+        isActive: true,
+        ingredients: {
+          create: [
+            { ingredientId: coffeeBeans.id, quantity: 18.0 },
+            { ingredientId: water.id, quantity: 60.0 },
+            { ingredientId: oatMilk.id, quantity: 120.0 },
+          ],
+        },
+      },
+    }));
+
+    console.log(`✅ Created ${recipes.length} recipe variants with realistic ingredients`);
 
     // Create packaging options
     console.log('\n6. Creating packaging options...');

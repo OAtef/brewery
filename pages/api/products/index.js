@@ -1,4 +1,5 @@
 import prisma from "../../../lib/prisma";
+import { calculateRecipeCost, PRICING_CONFIG } from "../../../lib/pricing";
 
 export default async function handler(req, res) {
   try {
@@ -21,10 +22,47 @@ export default async function handler(req, res) {
         },
       });
 
-      res.status(200).json(products);
+      // Calculate real-time pricing for each recipe
+      const productsWithPricing = products.map(product => {
+        const recipesWithPricing = product.recipes.map(recipe => {
+          // Only calculate pricing for recipes with ingredients
+          if (recipe.ingredients.length > 0) {
+            const category = product.category.toLowerCase();
+            const pricingOptions = PRICING_CONFIG[category] || PRICING_CONFIG.coffee;
+            
+            const costBreakdown = calculateRecipeCost(recipe.ingredients, pricingOptions);
+            const finalPrice = costBreakdown.sellingPrice + (recipe.priceModifier || 0);
+
+            return {
+              ...recipe,
+              calculatedPrice: Math.round(finalPrice * 100) / 100,
+              costBreakdown: {
+                ingredientCost: costBreakdown.ingredientCost,
+                laborCost: costBreakdown.laborCost,
+                totalCost: costBreakdown.baseCost,
+                profitMargin: costBreakdown.profitMargin,
+              },
+            };
+          } else {
+            // For recipes without ingredients (retail items), use base price
+            return {
+              ...recipe,
+              calculatedPrice: product.basePrice + (recipe.priceModifier || 0),
+              costBreakdown: null,
+            };
+          }
+        });
+
+        return {
+          ...product,
+          recipes: recipesWithPricing,
+        };
+      });
+
+      res.status(200).json(productsWithPricing);
     } else if (req.method === "POST") {
       // Create a new product
-      const { name, category } = req.body;
+      const { name, category, description, basePrice = 0 } = req.body;
 
       if (!name || !category) {
         return res
@@ -36,6 +74,8 @@ export default async function handler(req, res) {
         data: {
           name,
           category,
+          description,
+          basePrice,
         },
         include: {
           recipes: {
