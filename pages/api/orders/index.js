@@ -69,12 +69,31 @@ export default async function handler(req, res) {
       });
 
       if (!client) {
+        // Create new client with proper defaults for optional fields
         client = await prisma.client.create({
           data: {
-            ...clientData,
+            client_number: clientData.client_number,
+            name: clientData.name || "",
+            address: clientData.address || "",
             application_used: application || "web",
           },
         });
+      } else {
+        // Update existing client if new information is provided
+        const updateData = {};
+        if (clientData.name && clientData.name.trim() !== "") {
+          updateData.name = clientData.name;
+        }
+        if (clientData.address && clientData.address.trim() !== "") {
+          updateData.address = clientData.address;
+        }
+        
+        if (Object.keys(updateData).length > 0) {
+          client = await prisma.client.update({
+            where: { id: client.id },
+            data: updateData,
+          });
+        }
       }
 
       const order = await prisma.order.create({

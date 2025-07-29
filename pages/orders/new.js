@@ -23,6 +23,7 @@ import { useAuth } from "../../lib/auth";
 import { useRouter } from "next/router";
 import ProductSelector from "../../components/ProductSelector";
 import CartDrawer from "../../components/CartDrawer";
+import { useNotification } from "../../components/NotificationProvider";
 
 export default function NewOrder() {
   const [products, setProducts] = useState([]);
@@ -38,8 +39,9 @@ export default function NewOrder() {
 
   const cart = useSelector((state) => state.cart.products);
   const dispatch = useDispatch();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const router = useRouter();
+  const { showError, showSuccess, showWarning } = useNotification();
 
   useEffect(() => {
     async function fetchProducts() {
@@ -82,12 +84,17 @@ export default function NewOrder() {
 
   const handleSubmitOrder = async () => {
     if (!user) {
-      alert("You must be logged in to create an order.");
+      showError("You must be logged in to create an order.", "Authentication Required");
       return;
     }
 
     if (cart.length === 0) {
-      alert("Your cart is empty.");
+      showWarning("Please add at least one product to your cart before submitting the order.", "Empty Cart");
+      return;
+    }
+
+    if (!clientData.client_number.trim()) {
+      showError("Client number is required.", "Missing Client Information");
       return;
     }
 
@@ -114,16 +121,38 @@ export default function NewOrder() {
         body: JSON.stringify(orderData),
       });
 
+      const data = await res.json();
+
       if (res.ok) {
         dispatch(clearCart());
-        router.push("/");
+        showSuccess("Order created successfully! Redirecting to home page...", "Order Created");
+        setTimeout(() => {
+          router.push("/");
+        }, 1500);
       } else {
-        const error = await res.json();
-        alert(`Failed to create order: ${error.error}`);
+        // Handle specific error cases
+        if (res.status === 400 && data.error === "Invalid user ID") {
+          showError(
+            "Your session appears to be invalid. You will be logged out automatically.", 
+            "Session Expired"
+          );
+          // Auto-logout after showing error
+          setTimeout(() => {
+            logout("invalid_session");
+          }, 2000);
+        } else {
+          showError(
+            data.error || "An unexpected error occurred while creating your order.", 
+            "Order Creation Failed"
+          );
+        }
       }
     } catch (error) {
       console.error("Failed to create order", error);
-      alert("An unexpected error occurred. Please try again.");
+      showError(
+        "Network error occurred. Please check your connection and try again.", 
+        "Network Error"
+      );
     }
   };
 
@@ -166,7 +195,6 @@ export default function NewOrder() {
           </Grid>
           <Grid item xs={12} sm={6}>
             <TextField
-              required
               fullWidth
               id="name"
               label="Name"
@@ -177,7 +205,6 @@ export default function NewOrder() {
           </Grid>
           <Grid item xs={12}>
             <TextField
-              required
               fullWidth
               id="address"
               label="Address"

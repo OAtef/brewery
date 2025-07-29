@@ -6,6 +6,7 @@ import { Provider } from "react-redux";
 import { store } from "../lib/redux/store";
 
 import { AuthProvider } from "../lib/auth";
+import { NotificationProvider } from "../components/NotificationProvider";
 
 const theme = createTheme({
   palette: {
@@ -26,12 +27,14 @@ export default function MyApp({ Component, pageProps }) {
   return (
     <Provider store={store}>
       <AuthProvider>
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
-          <Layout>
-            <Component {...pageProps} />
-          </Layout>
-        </ThemeProvider>
+        <NotificationProvider>
+          <ThemeProvider theme={theme}>
+            <CssBaseline />
+            <Layout>
+              <Component {...pageProps} />
+            </Layout>
+          </ThemeProvider>
+        </NotificationProvider>
       </AuthProvider>
     </Provider>
   );

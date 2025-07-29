@@ -121,8 +121,8 @@ enum OrderStatus {
 model Client {
   id                Int     @id @default(autoincrement())
   client_number     String  @unique
-  name              String
-  address           String
+  name              String  @default("")
+  address           String  @default("")
   application_used  String
   orders            Order[]
 }
