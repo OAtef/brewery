@@ -27,13 +27,30 @@ export default async function handler(req, res) {
         client: clientData,
         products: productsData,
         userId,
+        application,
+        total,
         ...orderData
       } = req.body;
 
-      if (!clientData || !productsData || !userId || !orderData) {
+      // Debug logging
+      console.log("📤 Order API Request:", {
+        url: "/api/orders",
+        method: "POST",
+        body: JSON.stringify(req.body, null, 2)
+      });
+      console.log("📤 Parsed body:", {
+        client: clientData,
+        products: productsData?.length || 0,
+        userId,
+        application,
+        total,
+        orderData
+      });
+
+      if (!clientData || !productsData || !userId) {
         return res
           .status(400)
-          .json({ error: "Client, products, userId, and order data are required" });
+          .json({ error: "Client, products, and userId are required" });
       }
 
       // Verify user exists
@@ -53,13 +70,20 @@ export default async function handler(req, res) {
 
       if (!client) {
         client = await prisma.client.create({
-          data: clientData,
+          data: {
+            ...clientData,
+            application_used: application || "web",
+          },
         });
       }
 
       const order = await prisma.order.create({
         data: {
-          ...orderData,
+          application: application || "web",
+          total: total || 0,
+          status: orderData.status || "PENDING",
+          promoCode: orderData.promoCode || null,
+          notes: orderData.notes || null,
           client: {
             connect: { id: client.id },
           },
@@ -96,6 +120,8 @@ export default async function handler(req, res) {
     }
   } catch (error) {
     console.error("Orders API error:", error);
-    res.status(500).json({ error: "Internal server error" });
+    console.error("Error details:", error.message);
+    console.error("Stack trace:", error.stack);
+    res.status(500).json({ error: "Internal server error", details: error.message });
   }
 }
