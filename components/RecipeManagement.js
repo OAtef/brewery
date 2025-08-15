@@ -141,15 +141,22 @@ export default function RecipeManagement() {
 
     // Search filter
     if (productSearchQuery) {
-      filtered = filtered.filter(product =>
-        product.name.toLowerCase().includes(productSearchQuery.toLowerCase()) ||
-        product.description?.toLowerCase().includes(productSearchQuery.toLowerCase())
+      filtered = filtered.filter(
+        (product) =>
+          product.name
+            .toLowerCase()
+            .includes(productSearchQuery.toLowerCase()) ||
+          product.description
+            ?.toLowerCase()
+            .includes(productSearchQuery.toLowerCase())
       );
     }
 
     // Category filter
     if (productCategoryFilter) {
-      filtered = filtered.filter(product => product.category === productCategoryFilter);
+      filtered = filtered.filter(
+        (product) => product.category === productCategoryFilter
+      );
     }
 
     // Sorting
@@ -181,7 +188,13 @@ export default function RecipeManagement() {
     });
 
     setFilteredProducts(filtered);
-  }, [products, productSearchQuery, productCategoryFilter, productSortBy, productSortOrder]);
+  }, [
+    products,
+    productSearchQuery,
+    productCategoryFilter,
+    productSortBy,
+    productSortOrder,
+  ]);
 
   // Recipe filtering and searching
   useEffect(() => {
@@ -189,45 +202,60 @@ export default function RecipeManagement() {
 
     // Search filter
     if (recipeSearchQuery) {
-      filtered = filtered.filter(recipe =>
-        recipe.product?.name.toLowerCase().includes(recipeSearchQuery.toLowerCase()) ||
-        recipe.variant.toLowerCase().includes(recipeSearchQuery.toLowerCase()) ||
-        recipe.ingredients?.some(ri => 
-          ri.ingredient.name.toLowerCase().includes(recipeSearchQuery.toLowerCase())
-        )
+      filtered = filtered.filter(
+        (recipe) =>
+          recipe.product?.name
+            .toLowerCase()
+            .includes(recipeSearchQuery.toLowerCase()) ||
+          recipe.variant
+            .toLowerCase()
+            .includes(recipeSearchQuery.toLowerCase()) ||
+          recipe.ingredients?.some((ri) =>
+            ri.ingredient.name
+              .toLowerCase()
+              .includes(recipeSearchQuery.toLowerCase())
+          )
       );
     }
 
     // Category filter
     if (recipeCategoryFilter) {
-      filtered = filtered.filter(recipe => recipe.product?.category === recipeCategoryFilter);
+      filtered = filtered.filter(
+        (recipe) => recipe.product?.category === recipeCategoryFilter
+      );
     }
 
     // Variant filter
     if (recipeVariantFilter) {
-      filtered = filtered.filter(recipe => 
+      filtered = filtered.filter((recipe) =>
         recipe.variant.toLowerCase().includes(recipeVariantFilter.toLowerCase())
       );
     }
 
     // Cost filter
     if (recipeCostFilter) {
-      filtered = filtered.filter(recipe => {
+      filtered = filtered.filter((recipe) => {
         const cost = calculateRecipeCost(recipe);
         switch (recipeCostFilter) {
-          case "low": return cost < 2;
-          case "medium": return cost >= 2 && cost < 5;
-          case "high": return cost >= 5;
-          default: return true;
+          case "low":
+            return cost < 2;
+          case "medium":
+            return cost >= 2 && cost < 5;
+          case "high":
+            return cost >= 5;
+          default:
+            return true;
         }
       });
     }
 
     // Ingredient filter
     if (recipeIngredientFilter) {
-      filtered = filtered.filter(recipe =>
-        recipe.ingredients?.some(ri =>
-          ri.ingredient.name.toLowerCase().includes(recipeIngredientFilter.toLowerCase())
+      filtered = filtered.filter((recipe) =>
+        recipe.ingredients?.some((ri) =>
+          ri.ingredient.name
+            .toLowerCase()
+            .includes(recipeIngredientFilter.toLowerCase())
         )
       );
     }
@@ -269,7 +297,16 @@ export default function RecipeManagement() {
     });
 
     setFilteredRecipes(filtered);
-  }, [recipes, recipeSearchQuery, recipeCategoryFilter, recipeVariantFilter, recipeCostFilter, recipeIngredientFilter, recipeSortBy, recipeSortOrder]);
+  }, [
+    recipes,
+    recipeSearchQuery,
+    recipeCategoryFilter,
+    recipeVariantFilter,
+    recipeCostFilter,
+    recipeIngredientFilter,
+    recipeSortBy,
+    recipeSortOrder,
+  ]);
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
@@ -348,17 +385,17 @@ export default function RecipeManagement() {
 
   // Get unique values for filters
   const getUniqueCategories = () => {
-    return [...new Set(products.map(p => p.category))].sort();
+    return [...new Set(products.map((p) => p.category))].sort();
   };
 
   const getUniqueVariants = () => {
-    return [...new Set(recipes.map(r => r.variant))].sort();
+    return [...new Set(recipes.map((r) => r.variant))].sort();
   };
 
   const getUniqueIngredients = () => {
     const ingredients = new Set();
-    recipes.forEach(recipe => {
-      recipe.ingredients?.forEach(ri => {
+    recipes.forEach((recipe) => {
+      recipe.ingredients?.forEach((ri) => {
         ingredients.add(ri.ingredient.name);
       });
     });
@@ -484,9 +521,9 @@ export default function RecipeManagement() {
                 }}
               />
             </Grid>
-            
-            <Grid item xs={12} sm={6} md={3}>
-              <FormControl fullWidth>
+
+            <Grid item>
+              <FormControl sx={{ m: 1, minWidth: 120 }}>
                 <InputLabel>Category</InputLabel>
                 <Select
                   value={productCategoryFilter}
@@ -494,7 +531,7 @@ export default function RecipeManagement() {
                   onChange={(e) => setProductCategoryFilter(e.target.value)}
                 >
                   <MenuItem value="">All Categories</MenuItem>
-                  {getUniqueCategories().map(category => (
+                  {getUniqueCategories().map((category) => (
                     <MenuItem key={category} value={category}>
                       {category}
                     </MenuItem>
@@ -520,16 +557,21 @@ export default function RecipeManagement() {
 
           {/* Quick filter buttons for products */}
           <Box mt={2} display="flex" gap={1} flexWrap="wrap">
-            {getUniqueCategories().map(category => (
+            {getUniqueCategories().map((category) => (
               <Button
                 key={category}
                 size="small"
-                variant={productCategoryFilter === category ? "contained" : "outlined"}
-                onClick={() => setProductCategoryFilter(
-                  productCategoryFilter === category ? "" : category
-                )}
+                variant={
+                  productCategoryFilter === category ? "contained" : "outlined"
+                }
+                onClick={() =>
+                  setProductCategoryFilter(
+                    productCategoryFilter === category ? "" : category
+                  )
+                }
               >
-                {category} ({products.filter(p => p.category === category).length})
+                {category} (
+                {products.filter((p) => p.category === category).length})
               </Button>
             ))}
           </Box>
@@ -540,18 +582,23 @@ export default function RecipeManagement() {
             <Grid item xs={12}>
               <Paper sx={{ p: 4, textAlign: "center" }}>
                 <Typography variant="body1" color="textSecondary">
-                  {products.length === 0 
+                  {products.length === 0
                     ? "No products found. Add your first product to get started."
-                    : "No products match your current filters. Try adjusting your search criteria."
-                  }
+                    : "No products match your current filters. Try adjusting your search criteria."}
                 </Typography>
               </Paper>
             </Grid>
           ) : (
             filteredProducts.map((product) => (
               <Grid item xs={12} sm={6} md={4} lg={3} key={product.id}>
-                <Card>
-                  <CardContent>
+                <Card
+                  sx={{
+                    height: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                >
+                  <CardContent sx={{ flexGrow: 1 }}>
                     <Typography variant="h6" gutterBottom>
                       {product.name}
                     </Typography>
@@ -566,12 +613,12 @@ export default function RecipeManagement() {
                         variant="body2"
                         color="text.secondary"
                         gutterBottom
-                        sx={{ 
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          display: '-webkit-box',
+                        sx={{
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          display: "-webkit-box",
                           WebkitLineClamp: 2,
-                          WebkitBoxOrient: 'vertical',
+                          WebkitBoxOrient: "vertical",
                         }}
                       >
                         {product.description}
@@ -593,22 +640,16 @@ export default function RecipeManagement() {
                         Base Price: ${product.basePrice.toFixed(2)}
                       </Typography>
                     )}
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        mt: 2,
-                      }}
-                    >
-                      <Button
-                        size="small"
-                        color="error"
-                        onClick={() => handleDeleteClick(product, "product")}
-                      >
-                        Delete
-                      </Button>
-                    </Box>
                   </CardContent>
+                  <Box sx={{ p: 2, pt: 0 }}>
+                    <Button
+                      size="small"
+                      color="error"
+                      onClick={() => handleDeleteClick(product, "product")}
+                    >
+                      Delete
+                    </Button>
+                  </Box>
                 </Card>
               </Grid>
             ))
@@ -649,8 +690,8 @@ export default function RecipeManagement() {
                 }}
               />
             </Grid>
-            
-            <Grid item xs={12} sm={6} md={2}>
+
+            <Grid item sx={{ m: 1, minWidth: 120 }} xs={12} sm={6} md={2}>
               <FormControl fullWidth>
                 <InputLabel>Category</InputLabel>
                 <Select
@@ -659,7 +700,7 @@ export default function RecipeManagement() {
                   onChange={(e) => setRecipeCategoryFilter(e.target.value)}
                 >
                   <MenuItem value="">All Categories</MenuItem>
-                  {getUniqueCategories().map(category => (
+                  {getUniqueCategories().map((category) => (
                     <MenuItem key={category} value={category}>
                       {category}
                     </MenuItem>
@@ -668,7 +709,7 @@ export default function RecipeManagement() {
               </FormControl>
             </Grid>
 
-            <Grid item xs={12} sm={6} md={2}>
+            <Grid item sx={{ m: 1, minWidth: 120 }} xs={12} sm={6} md={2}>
               <FormControl fullWidth>
                 <InputLabel>Variant</InputLabel>
                 <Select
@@ -677,7 +718,7 @@ export default function RecipeManagement() {
                   onChange={(e) => setRecipeVariantFilter(e.target.value)}
                 >
                   <MenuItem value="">All Variants</MenuItem>
-                  {getUniqueVariants().map(variant => (
+                  {getUniqueVariants().map((variant) => (
                     <MenuItem key={variant} value={variant}>
                       {variant}
                     </MenuItem>
@@ -686,7 +727,7 @@ export default function RecipeManagement() {
               </FormControl>
             </Grid>
 
-            <Grid item xs={12} sm={6} md={2}>
+            <Grid item sx={{ m: 1, minWidth: 120 }} xs={12} sm={6} md={2}>
               <FormControl fullWidth>
                 <InputLabel>Cost Range</InputLabel>
                 <Select
@@ -739,34 +780,47 @@ export default function RecipeManagement() {
               size="small"
               variant={recipeCostFilter === "low" ? "contained" : "outlined"}
               color="success"
-              onClick={() => setRecipeCostFilter(
-                recipeCostFilter === "low" ? "" : "low"
-              )}
+              onClick={() =>
+                setRecipeCostFilter(recipeCostFilter === "low" ? "" : "low")
+              }
             >
-              Low Cost ({recipes.filter(r => calculateRecipeCost(r) < 2).length})
+              Low Cost (
+              {recipes.filter((r) => calculateRecipeCost(r) < 2).length})
             </Button>
             <Button
               size="small"
               variant={recipeCostFilter === "high" ? "contained" : "outlined"}
               color="warning"
-              onClick={() => setRecipeCostFilter(
-                recipeCostFilter === "high" ? "" : "high"
-              )}
+              onClick={() =>
+                setRecipeCostFilter(recipeCostFilter === "high" ? "" : "high")
+              }
             >
-              High Cost ({recipes.filter(r => calculateRecipeCost(r) >= 5).length})
+              High Cost (
+              {recipes.filter((r) => calculateRecipeCost(r) >= 5).length})
             </Button>
-            {getUniqueCategories().slice(0, 3).map(category => (
-              <Button
-                key={category}
-                size="small"
-                variant={recipeCategoryFilter === category ? "contained" : "outlined"}
-                onClick={() => setRecipeCategoryFilter(
-                  recipeCategoryFilter === category ? "" : category
-                )}
-              >
-                {category} ({recipes.filter(r => r.product?.category === category).length})
-              </Button>
-            ))}
+            {getUniqueCategories()
+              .slice(0, 3)
+              .map((category) => (
+                <Button
+                  key={category}
+                  size="small"
+                  variant={
+                    recipeCategoryFilter === category ? "contained" : "outlined"
+                  }
+                  onClick={() =>
+                    setRecipeCategoryFilter(
+                      recipeCategoryFilter === category ? "" : category
+                    )
+                  }
+                >
+                  {category} (
+                  {
+                    recipes.filter((r) => r.product?.category === category)
+                      .length
+                  }
+                  )
+                </Button>
+              ))}
           </Box>
         </Paper>
 
@@ -777,7 +831,9 @@ export default function RecipeManagement() {
                 <TableCell>
                   <TableSortLabel
                     active={recipeSortBy === "productName"}
-                    direction={recipeSortBy === "productName" ? recipeSortOrder : "asc"}
+                    direction={
+                      recipeSortBy === "productName" ? recipeSortOrder : "asc"
+                    }
                     onClick={() => handleRecipeSort("productName")}
                   >
                     Product
@@ -786,7 +842,9 @@ export default function RecipeManagement() {
                 <TableCell>
                   <TableSortLabel
                     active={recipeSortBy === "variant"}
-                    direction={recipeSortBy === "variant" ? recipeSortOrder : "asc"}
+                    direction={
+                      recipeSortBy === "variant" ? recipeSortOrder : "asc"
+                    }
                     onClick={() => handleRecipeSort("variant")}
                   >
                     Variant
@@ -795,7 +853,9 @@ export default function RecipeManagement() {
                 <TableCell>
                   <TableSortLabel
                     active={recipeSortBy === "category"}
-                    direction={recipeSortBy === "category" ? recipeSortOrder : "asc"}
+                    direction={
+                      recipeSortBy === "category" ? recipeSortOrder : "asc"
+                    }
                     onClick={() => handleRecipeSort("category")}
                   >
                     Category
@@ -804,7 +864,11 @@ export default function RecipeManagement() {
                 <TableCell>
                   <TableSortLabel
                     active={recipeSortBy === "ingredientCount"}
-                    direction={recipeSortBy === "ingredientCount" ? recipeSortOrder : "asc"}
+                    direction={
+                      recipeSortBy === "ingredientCount"
+                        ? recipeSortOrder
+                        : "asc"
+                    }
                     onClick={() => handleRecipeSort("ingredientCount")}
                   >
                     Ingredients
@@ -813,7 +877,9 @@ export default function RecipeManagement() {
                 <TableCell>
                   <TableSortLabel
                     active={recipeSortBy === "cost"}
-                    direction={recipeSortBy === "cost" ? recipeSortOrder : "asc"}
+                    direction={
+                      recipeSortBy === "cost" ? recipeSortOrder : "asc"
+                    }
                     onClick={() => handleRecipeSort("cost")}
                   >
                     Estimated Cost
@@ -827,10 +893,9 @@ export default function RecipeManagement() {
                 <TableRow>
                   <TableCell colSpan={6} align="center">
                     <Typography variant="body2" color="textSecondary" py={4}>
-                      {recipes.length === 0 
+                      {recipes.length === 0
                         ? "No recipes found. Add your first recipe to get started."
-                        : "No recipes match your current filters. Try adjusting your search criteria."
-                      }
+                        : "No recipes match your current filters. Try adjusting your search criteria."}
                     </Typography>
                   </TableCell>
                 </TableRow>
@@ -839,9 +904,9 @@ export default function RecipeManagement() {
                   <TableRow key={recipe.id}>
                     <TableCell>{recipe.product?.name}</TableCell>
                     <TableCell>
-                      <Chip 
-                        label={recipe.variant} 
-                        size="small" 
+                      <Chip
+                        label={recipe.variant}
+                        size="small"
                         variant="outlined"
                       />
                     </TableCell>
@@ -853,7 +918,9 @@ export default function RecipeManagement() {
                         <Typography variant="body2" gutterBottom>
                           {recipe.ingredients?.length || 0} ingredients
                         </Typography>
-                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                        <Box
+                          sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}
+                        >
                           {recipe.ingredients?.slice(0, 3).map((ri, index) => (
                             <Chip
                               key={index}
@@ -876,15 +943,16 @@ export default function RecipeManagement() {
                     <TableCell>
                       <Typography
                         color={
-                          calculateRecipeCost(recipe) >= 5 
-                            ? "warning.main" 
-                            : calculateRecipeCost(recipe) < 2 
-                            ? "success.main" 
+                          calculateRecipeCost(recipe) >= 5
+                            ? "warning.main"
+                            : calculateRecipeCost(recipe) < 2
+                            ? "success.main"
                             : "inherit"
                         }
                         fontWeight={
-                          calculateRecipeCost(recipe) >= 5 || calculateRecipeCost(recipe) < 2 
-                            ? "bold" 
+                          calculateRecipeCost(recipe) >= 5 ||
+                          calculateRecipeCost(recipe) < 2
+                            ? "bold"
                             : "normal"
                         }
                       >

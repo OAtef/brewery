@@ -57,13 +57,13 @@ import {
   Title,
   Tooltip as ChartTooltip,
   Legend,
-} from 'chart.js';
-import { Bar, Line } from 'react-chartjs-2';
-import LowStockWarnings from '../components/LowStockWarnings';
-import WasteTracking from '../components/WasteTracking';
-import CostAnalysis from '../components/CostAnalysis';
-import OrderProcessingTime from '../components/OrderProcessingTime';
-import RevenueTrends from '../components/RevenueTrends';
+} from "chart.js";
+import { Bar, Line } from "react-chartjs-2";
+import LowStockWarnings from "../components/LowStockWarnings";
+import WasteTracking from "../components/WasteTracking";
+import CostAnalysis from "../components/CostAnalysis";
+import OrderProcessingTime from "../components/OrderProcessingTime";
+import RevenueTrends from "../components/RevenueTrends";
 
 ChartJS.register(
   CategoryScale,
@@ -84,8 +84,8 @@ export default function Dashboard() {
   const [queueLoading, setQueueLoading] = useState(false);
   const [peakHoursLoading, setPeakHoursLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [statusFilter, setStatusFilter] = useState('active');
-  const [peakHoursPeriod, setPeakHoursPeriod] = useState('today');
+  const [statusFilter, setStatusFilter] = useState("active");
+  const [peakHoursPeriod, setPeakHoursPeriod] = useState("today");
 
   // Fetch today's sales summary
   useEffect(() => {
@@ -93,11 +93,11 @@ export default function Dashboard() {
       try {
         setLoading(true);
         const response = await fetch("/api/analytics/sales-summary");
-        
+
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const data = await response.json();
         setSalesData(data);
       } catch (err) {
@@ -109,7 +109,7 @@ export default function Dashboard() {
     };
 
     fetchSalesData();
-    
+
     // Refresh data every 5 minutes
     const interval = setInterval(fetchSalesData, 5 * 60 * 1000);
     return () => clearInterval(interval);
@@ -121,11 +121,11 @@ export default function Dashboard() {
       try {
         setQueueLoading(true);
         const response = await fetch("/api/analytics/order-queue");
-        
+
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const data = await response.json();
         setQueueData(data);
       } catch (err) {
@@ -137,7 +137,7 @@ export default function Dashboard() {
     };
 
     fetchQueueData();
-    
+
     // Refresh queue data every 30 seconds for real-time updates
     const interval = setInterval(fetchQueueData, 30 * 1000);
     return () => clearInterval(interval);
@@ -148,12 +148,14 @@ export default function Dashboard() {
     const fetchPeakHoursData = async () => {
       try {
         setPeakHoursLoading(true);
-        const response = await fetch(`/api/analytics/peak-hours?period=${peakHoursPeriod}`);
-        
+        const response = await fetch(
+          `/api/analytics/peak-hours?period=${peakHoursPeriod}`
+        );
+
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const data = await response.json();
         setPeakHoursData(data);
       } catch (err) {
@@ -195,9 +197,9 @@ export default function Dashboard() {
   };
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
     }).format(amount);
   };
 
@@ -215,21 +217,31 @@ export default function Dashboard() {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'PENDING': return 'warning';
-      case 'PREPARING': return 'info';
-      case 'READY': return 'success';
-      case 'COMPLETED': return 'default';
-      case 'CANCELLED': return 'error';
-      default: return 'default';
+      case "PENDING":
+        return "warning";
+      case "PREPARING":
+        return "info";
+      case "READY":
+        return "success";
+      case "COMPLETED":
+        return "default";
+      case "CANCELLED":
+        return "error";
+      default:
+        return "default";
     }
   };
 
   const getPriorityColor = (priority) => {
     switch (priority) {
-      case 'urgent': return 'error';
-      case 'high': return 'warning';
-      case 'normal': return 'default';
-      default: return 'default';
+      case "urgent":
+        return "error";
+      case "high":
+        return "warning";
+      case "normal":
+        return "default";
+      default:
+        return "default";
     }
   };
 
@@ -237,17 +249,22 @@ export default function Dashboard() {
   const getChartData = () => {
     if (!peakHoursData?.hourlyData) return null;
 
-    const labels = peakHoursData.hourlyData.map(h => h.hourLabel);
-    const orderCounts = peakHoursData.hourlyData.map(h => h.orderCount);
-    const revenues = peakHoursData.hourlyData.map(h => h.revenue);
+    const labels = peakHoursData.hourlyData.map((h) => h.hourLabel);
+    const orderCounts = peakHoursData.hourlyData.map((h) => h.orderCount);
+    const revenues = peakHoursData.hourlyData.map((h) => h.revenue);
 
-    const busyLevelColors = peakHoursData.hourlyData.map(h => {
+    const busyLevelColors = peakHoursData.hourlyData.map((h) => {
       switch (h.busyLevel) {
-        case 'peak': return 'rgba(244, 67, 54, 0.8)'; // Red
-        case 'high': return 'rgba(255, 152, 0, 0.8)'; // Orange
-        case 'medium': return 'rgba(255, 193, 7, 0.8)'; // Yellow
-        case 'low': return 'rgba(76, 175, 80, 0.8)'; // Green
-        default: return 'rgba(158, 158, 158, 0.8)'; // Grey
+        case "peak":
+          return "rgba(244, 67, 54, 0.8)"; // Red
+        case "high":
+          return "rgba(255, 152, 0, 0.8)"; // Orange
+        case "medium":
+          return "rgba(255, 193, 7, 0.8)"; // Yellow
+        case "low":
+          return "rgba(76, 175, 80, 0.8)"; // Green
+        default:
+          return "rgba(158, 158, 158, 0.8)"; // Grey
       }
     });
 
@@ -255,10 +272,12 @@ export default function Dashboard() {
       labels,
       datasets: [
         {
-          label: 'Orders',
+          label: "Orders",
           data: orderCounts,
           backgroundColor: busyLevelColors,
-          borderColor: busyLevelColors.map(color => color.replace('0.8', '1')),
+          borderColor: busyLevelColors.map((color) =>
+            color.replace("0.8", "1")
+          ),
           borderWidth: 1,
         },
       ],
@@ -268,17 +287,17 @@ export default function Dashboard() {
   const getRevenueChartData = () => {
     if (!peakHoursData?.hourlyData) return null;
 
-    const labels = peakHoursData.hourlyData.map(h => h.hourLabel);
-    const revenues = peakHoursData.hourlyData.map(h => h.revenue);
+    const labels = peakHoursData.hourlyData.map((h) => h.hourLabel);
+    const revenues = peakHoursData.hourlyData.map((h) => h.revenue);
 
     return {
       labels,
       datasets: [
         {
-          label: 'Revenue ($)',
+          label: "Revenue ($)",
           data: revenues,
-          borderColor: 'rgba(54, 162, 235, 1)',
-          backgroundColor: 'rgba(54, 162, 235, 0.2)',
+          borderColor: "rgba(54, 162, 235, 1)",
+          backgroundColor: "rgba(54, 162, 235, 0.2)",
           borderWidth: 2,
           fill: true,
           tension: 0.4,
@@ -291,11 +310,11 @@ export default function Dashboard() {
     responsive: true,
     plugins: {
       legend: {
-        position: 'top',
+        position: "top",
       },
       title: {
         display: true,
-        text: 'Hourly Order Volume',
+        text: "Hourly Order Volume",
       },
     },
     scales: {
@@ -312,19 +331,19 @@ export default function Dashboard() {
     responsive: true,
     plugins: {
       legend: {
-        position: 'top',
+        position: "top",
       },
       title: {
         display: true,
-        text: 'Hourly Revenue',
+        text: "Hourly Revenue",
       },
     },
     scales: {
       y: {
         beginAtZero: true,
         ticks: {
-          callback: function(value) {
-            return '$' + value.toFixed(2);
+          callback: function (value) {
+            return "$" + value.toFixed(2);
           },
         },
       },
@@ -333,21 +352,21 @@ export default function Dashboard() {
 
   const getFilteredOrders = () => {
     if (!queueData?.ordersByStatus) return [];
-    
+
     switch (statusFilter) {
-      case 'active':
+      case "active":
         return [
           ...queueData.ordersByStatus.pending,
           ...queueData.ordersByStatus.preparing,
-          ...queueData.ordersByStatus.ready
+          ...queueData.ordersByStatus.ready,
         ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-      case 'pending':
+      case "pending":
         return queueData.ordersByStatus.pending;
-      case 'preparing':
+      case "preparing":
         return queueData.ordersByStatus.preparing;
-      case 'ready':
+      case "ready":
         return queueData.ordersByStatus.ready;
-      case 'completed':
+      case "completed":
         return queueData.ordersByStatus.completed;
       default:
         return queueData.orders || [];
@@ -372,9 +391,7 @@ export default function Dashboard() {
   if (error) {
     return (
       <Box sx={{ p: 3 }}>
-        <Alert severity="error">
-          Error loading dashboard: {error}
-        </Alert>
+        <Alert severity="error">Error loading dashboard: {error}</Alert>
       </Box>
     );
   }
@@ -393,17 +410,25 @@ export default function Dashboard() {
 
       {/* Today's Sales Summary */}
       <Box sx={{ mb: 4 }}>
-        <Typography variant="h5" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Typography
+          variant="h5"
+          gutterBottom
+          sx={{ display: "flex", alignItems: "center", gap: 1 }}
+        >
           <LocalCafeIcon />
           Today's Sales Summary
         </Typography>
-        
+
         <Grid container spacing={3}>
           {/* Total Revenue */}
           <Grid item xs={12} sm={6} md={3}>
-            <Card elevation={2}>
+            <Card elevation={2} sx={{ height: "100%" }}>
               <CardContent>
-                <Stack direction="row" alignItems="center" justifyContent="space-between">
+                <Stack
+                  direction="row"
+                  alignItems="center"
+                  justifyContent="space-between"
+                >
                   <Box>
                     <Typography variant="h4" color="primary" fontWeight="bold">
                       {formatCurrency(salesData?.totalRevenue || 0)}
@@ -412,15 +437,31 @@ export default function Dashboard() {
                       Total Revenue
                     </Typography>
                   </Box>
-                  <AttachMoneyIcon sx={{ fontSize: 40, color: "primary.main" }} />
+                  <AttachMoneyIcon
+                    sx={{ fontSize: 40, color: "primary.main" }}
+                  />
                 </Stack>
-                
+
                 {salesData?.revenueChange !== undefined && (
-                  <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Box sx={{ color: getChangeColor(salesData.revenueChange), display: 'flex', alignItems: 'center' }}>
+                  <Box
+                    sx={{
+                      mt: 2,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        color: getChangeColor(salesData.revenueChange),
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                    >
                       {getChangeIcon(salesData.revenueChange)}
                       <Typography variant="body2" sx={{ ml: 0.5 }}>
-                        {salesData.revenueChange > 0 ? '+' : ''}{salesData.revenueChange.toFixed(1)}%
+                        {salesData.revenueChange > 0 ? "+" : ""}
+                        {salesData.revenueChange.toFixed(1)}%
                       </Typography>
                     </Box>
                     <Typography variant="body2" color="text.secondary">
@@ -434,18 +475,28 @@ export default function Dashboard() {
 
           {/* Total Orders */}
           <Grid item xs={12} sm={6} md={3}>
-            <Card elevation={2}>
+            <Card elevation={2} sx={{ height: "100%" }}>
               <CardContent>
-                <Stack direction="row" alignItems="center" justifyContent="space-between">
+                <Stack
+                  direction="row"
+                  alignItems="center"
+                  justifyContent="space-between"
+                >
                   <Box>
-                    <Typography variant="h4" color="secondary" fontWeight="bold">
+                    <Typography
+                      variant="h4"
+                      color="secondary"
+                      fontWeight="bold"
+                    >
                       {salesData?.totalOrders || 0}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                       Total Orders
                     </Typography>
                   </Box>
-                  <ShoppingCartIcon sx={{ fontSize: 40, color: "secondary.main" }} />
+                  <ShoppingCartIcon
+                    sx={{ fontSize: 40, color: "secondary.main" }}
+                  />
                 </Stack>
               </CardContent>
             </Card>
@@ -453,11 +504,19 @@ export default function Dashboard() {
 
           {/* Average Order Value */}
           <Grid item xs={12} sm={6} md={3}>
-            <Card elevation={2}>
+            <Card elevation={2} sx={{ height: "100%" }}>
               <CardContent>
-                <Stack direction="row" alignItems="center" justifyContent="space-between">
+                <Stack
+                  direction="row"
+                  alignItems="center"
+                  justifyContent="space-between"
+                >
                   <Box>
-                    <Typography variant="h4" color="success.main" fontWeight="bold">
+                    <Typography
+                      variant="h4"
+                      color="success.main"
+                      fontWeight="bold"
+                    >
                       {formatCurrency(salesData?.averageOrderValue || 0)}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
@@ -472,26 +531,38 @@ export default function Dashboard() {
 
           {/* Popular Items */}
           <Grid item xs={12} sm={6} md={3}>
-            <Card elevation={2}>
+            <Card elevation={2} sx={{ height: "100%" }}>
               <CardContent>
                 <Typography variant="h6" gutterBottom>
                   🔥 Popular Today
                 </Typography>
                 <Stack spacing={1}>
                   {salesData?.popularItems?.slice(0, 3).map((item, index) => (
-                    <Box key={index} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <Typography variant="body2" noWrap sx={{ flex: 1, mr: 1 }}>
+                    <Box
+                      key={index}
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Typography
+                        variant="body2"
+                        noWrap
+                        sx={{ flex: 1, mr: 1 }}
+                      >
                         {item.name}
                       </Typography>
-                      <Chip 
-                        label={item.count} 
-                        size="small" 
+                      <Chip
+                        label={item.count}
+                        size="small"
                         color="primary"
                         variant="outlined"
                       />
                     </Box>
                   ))}
-                  {(!salesData?.popularItems || salesData.popularItems.length === 0) && (
+                  {(!salesData?.popularItems ||
+                    salesData.popularItems.length === 0) && (
                     <Typography variant="body2" color="text.secondary">
                       No sales today yet
                     </Typography>
@@ -505,8 +576,18 @@ export default function Dashboard() {
 
       {/* Live Order Queue */}
       <Box sx={{ mb: 4 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
-          <Typography variant="h5" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            mb: 3,
+          }}
+        >
+          <Typography
+            variant="h5"
+            sx={{ display: "flex", alignItems: "center", gap: 1 }}
+          >
             <QueueIcon />
             Live Order Queue
             {queueLoading && <CircularProgress size={20} />}
@@ -525,7 +606,7 @@ export default function Dashboard() {
         <Grid container spacing={2} sx={{ mb: 3 }}>
           <Grid item xs={6} sm={3}>
             <Card elevation={1}>
-              <CardContent sx={{ textAlign: 'center', py: 2 }}>
+              <CardContent sx={{ textAlign: "center", py: 2 }}>
                 <Typography variant="h5" color="warning.main" fontWeight="bold">
                   {queueData?.queueStats?.totalActive || 0}
                 </Typography>
@@ -537,7 +618,7 @@ export default function Dashboard() {
           </Grid>
           <Grid item xs={6} sm={3}>
             <Card elevation={1}>
-              <CardContent sx={{ textAlign: 'center', py: 2 }}>
+              <CardContent sx={{ textAlign: "center", py: 2 }}>
                 <Typography variant="h5" color="info.main" fontWeight="bold">
                   {queueData?.queueStats?.averageWaitTime || 0}m
                 </Typography>
@@ -549,7 +630,7 @@ export default function Dashboard() {
           </Grid>
           <Grid item xs={6} sm={3}>
             <Card elevation={1}>
-              <CardContent sx={{ textAlign: 'center', py: 2 }}>
+              <CardContent sx={{ textAlign: "center", py: 2 }}>
                 <Typography variant="h5" color="error.main" fontWeight="bold">
                   {queueData?.queueStats?.overdueOrders || 0}
                 </Typography>
@@ -561,7 +642,7 @@ export default function Dashboard() {
           </Grid>
           <Grid item xs={6} sm={3}>
             <Card elevation={1}>
-              <CardContent sx={{ textAlign: 'center', py: 2 }}>
+              <CardContent sx={{ textAlign: "center", py: 2 }}>
                 <Typography variant="h5" color="success.main" fontWeight="bold">
                   {queueData?.queueStats?.totalReady || 0}
                 </Typography>
@@ -574,7 +655,7 @@ export default function Dashboard() {
         </Grid>
 
         {/* Filter Controls */}
-        <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Box sx={{ mb: 2, display: "flex", alignItems: "center", gap: 2 }}>
           <FormControl size="small" sx={{ minWidth: 150 }}>
             <InputLabel>Filter Orders</InputLabel>
             <Select
@@ -583,22 +664,34 @@ export default function Dashboard() {
               onChange={(e) => setStatusFilter(e.target.value)}
             >
               <MenuItem value="active">
-                <Badge badgeContent={queueData?.queueStats?.totalActive} color="warning">
+                <Badge
+                  badgeContent={queueData?.queueStats?.totalActive}
+                  color="warning"
+                >
                   Active Orders
                 </Badge>
               </MenuItem>
               <MenuItem value="pending">
-                <Badge badgeContent={queueData?.queueStats?.totalPending} color="warning">
+                <Badge
+                  badgeContent={queueData?.queueStats?.totalPending}
+                  color="warning"
+                >
                   Pending
                 </Badge>
               </MenuItem>
               <MenuItem value="preparing">
-                <Badge badgeContent={queueData?.queueStats?.totalPreparing} color="info">
+                <Badge
+                  badgeContent={queueData?.queueStats?.totalPreparing}
+                  color="info"
+                >
                   Preparing
                 </Badge>
               </MenuItem>
               <MenuItem value="ready">
-                <Badge badgeContent={queueData?.queueStats?.totalReady} color="success">
+                <Badge
+                  badgeContent={queueData?.queueStats?.totalReady}
+                  color="success"
+                >
                   Ready
                 </Badge>
               </MenuItem>
@@ -627,10 +720,9 @@ export default function Dashboard() {
                 <TableRow>
                   <TableCell colSpan={8} align="center">
                     <Typography variant="body2" color="text.secondary" py={4}>
-                      {queueData?.orders?.length === 0 
+                      {queueData?.orders?.length === 0
                         ? "No orders in queue"
-                        : `No ${statusFilter} orders found`
-                      }
+                        : `No ${statusFilter} orders found`}
                     </Typography>
                   </TableCell>
                 </TableRow>
@@ -646,7 +738,9 @@ export default function Dashboard() {
                       </Typography>
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body2">{order.client?.name}</Typography>
+                      <Typography variant="body2">
+                        {order.client?.name}
+                      </Typography>
                       <Typography variant="caption" color="text.secondary">
                         {order.client?.client_number}
                       </Typography>
@@ -655,7 +749,8 @@ export default function Dashboard() {
                       <Stack spacing={0.5}>
                         {order.products?.slice(0, 2).map((item, index) => (
                           <Typography key={index} variant="body2">
-                            {item.quantity}x {item.product?.name || item.recipe?.product?.name}
+                            {item.quantity}x{" "}
+                            {item.product?.name || item.recipe?.product?.name}
                           </Typography>
                         ))}
                         {order.products?.length > 2 && (
@@ -666,14 +761,16 @@ export default function Dashboard() {
                       </Stack>
                     </TableCell>
                     <TableCell>
-                      <Chip 
-                        label={order.status} 
+                      <Chip
+                        label={order.status}
                         color={getStatusColor(order.status)}
                         size="small"
                       />
                     </TableCell>
                     <TableCell>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                      >
                         <AccessTimeIcon sx={{ fontSize: 16 }} />
                         <Typography variant="body2">
                           {order.timeSinceOrder}m
@@ -686,8 +783,8 @@ export default function Dashboard() {
                       </Box>
                     </TableCell>
                     <TableCell>
-                      <Chip 
-                        label={order.priority} 
+                      <Chip
+                        label={order.priority}
                         color={getPriorityColor(order.priority)}
                         size="small"
                         variant="outlined"
@@ -700,45 +797,53 @@ export default function Dashboard() {
                     </TableCell>
                     <TableCell>
                       <Stack direction="row" spacing={1}>
-                        {order.status === 'PENDING' && (
+                        {order.status === "PENDING" && (
                           <Tooltip title="Start Preparing">
                             <IconButton
                               size="small"
                               color="info"
-                              onClick={() => updateOrderStatus(order.id, 'PREPARING')}
+                              onClick={() =>
+                                updateOrderStatus(order.id, "PREPARING")
+                              }
                             >
                               <PlayArrowIcon />
                             </IconButton>
                           </Tooltip>
                         )}
-                        {order.status === 'PREPARING' && (
+                        {order.status === "PREPARING" && (
                           <Tooltip title="Mark as Ready">
                             <IconButton
                               size="small"
                               color="success"
-                              onClick={() => updateOrderStatus(order.id, 'READY')}
+                              onClick={() =>
+                                updateOrderStatus(order.id, "READY")
+                              }
                             >
                               <CheckCircleIcon />
                             </IconButton>
                           </Tooltip>
                         )}
-                        {order.status === 'READY' && (
+                        {order.status === "READY" && (
                           <Tooltip title="Complete Order">
                             <IconButton
                               size="small"
                               color="primary"
-                              onClick={() => updateOrderStatus(order.id, 'COMPLETED')}
+                              onClick={() =>
+                                updateOrderStatus(order.id, "COMPLETED")
+                              }
                             >
                               <CheckCircleIcon />
                             </IconButton>
                           </Tooltip>
                         )}
-                        {['PENDING', 'PREPARING'].includes(order.status) && (
+                        {["PENDING", "PREPARING"].includes(order.status) && (
                           <Tooltip title="Cancel Order">
                             <IconButton
                               size="small"
                               color="error"
-                              onClick={() => updateOrderStatus(order.id, 'CANCELLED')}
+                              onClick={() =>
+                                updateOrderStatus(order.id, "CANCELLED")
+                              }
                             >
                               <CancelIcon />
                             </IconButton>
@@ -756,8 +861,18 @@ export default function Dashboard() {
 
       {/* Peak Hours Chart */}
       <Box sx={{ mb: 4 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
-          <Typography variant="h5" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            mb: 3,
+          }}
+        >
+          <Typography
+            variant="h5"
+            sx={{ display: "flex", alignItems: "center", gap: 1 }}
+          >
             <TimelineIcon />
             Peak Hours Analysis
             {peakHoursLoading && <CircularProgress size={20} />}
@@ -788,7 +903,7 @@ export default function Dashboard() {
                     {getChartData() ? (
                       <Bar data={getChartData()} options={chartOptions} />
                     ) : (
-                      <Box sx={{ textAlign: 'center', py: 4 }}>
+                      <Box sx={{ textAlign: "center", py: 4 }}>
                         <Typography variant="body2" color="text.secondary">
                           No data available for the selected period
                         </Typography>
@@ -803,9 +918,12 @@ export default function Dashboard() {
                 <Card elevation={2}>
                   <CardContent>
                     {getRevenueChartData() ? (
-                      <Line data={getRevenueChartData()} options={revenueChartOptions} />
+                      <Line
+                        data={getRevenueChartData()}
+                        options={revenueChartOptions}
+                      />
                     ) : (
-                      <Box sx={{ textAlign: 'center', py: 4 }}>
+                      <Box sx={{ textAlign: "center", py: 4 }}>
                         <Typography variant="body2" color="text.secondary">
                           No revenue data available
                         </Typography>
@@ -823,7 +941,11 @@ export default function Dashboard() {
               {/* Peak Hours Summary */}
               <Card elevation={2}>
                 <CardContent>
-                  <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography
+                    variant="h6"
+                    gutterBottom
+                    sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                  >
                     <WhatShotIcon color="error" />
                     Peak Hours
                   </Typography>
@@ -832,15 +954,23 @@ export default function Dashboard() {
                       {peakHoursData.insights.peakHours.map((hour, index) => (
                         <ListItem key={hour.hour} sx={{ px: 0 }}>
                           <ListItemIcon>
-                            <Chip 
-                              label={`#${index + 1}`} 
-                              size="small" 
-                              color={index === 0 ? "error" : index === 1 ? "warning" : "default"}
+                            <Chip
+                              label={`#${index + 1}`}
+                              size="small"
+                              color={
+                                index === 0
+                                  ? "error"
+                                  : index === 1
+                                  ? "warning"
+                                  : "default"
+                              }
                             />
                           </ListItemIcon>
                           <ListItemText
                             primary={hour.hourLabel}
-                            secondary={`${hour.orderCount} orders • ${formatCurrency(hour.revenue)}`}
+                            secondary={`${
+                              hour.orderCount
+                            } orders • ${formatCurrency(hour.revenue)}`}
                           />
                         </ListItem>
                       ))}
@@ -856,33 +986,40 @@ export default function Dashboard() {
               {/* Rush Periods */}
               <Card elevation={2}>
                 <CardContent>
-                  <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography
+                    variant="h6"
+                    gutterBottom
+                    sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                  >
                     <TrendingFlatIcon color="warning" />
                     Rush Periods
                   </Typography>
                   {peakHoursData?.insights?.rushPeriods?.length > 0 ? (
                     <List dense>
-                      {peakHoursData.insights.rushPeriods.map((period, index) => (
-                        <ListItem key={index} sx={{ px: 0 }}>
-                          <ListItemText
-                            primary={`${period.startLabel} - ${period.endLabel}`}
-                            secondary={
-                              <Box>
-                                <Typography variant="body2" component="span">
-                                  {period.orders} orders • {formatCurrency(period.revenue)}
-                                </Typography>
-                                <br />
-                                <Chip 
-                                  label={`${period.duration}h duration`} 
-                                  size="small" 
-                                  variant="outlined"
-                                  color="warning"
-                                />
-                              </Box>
-                            }
-                          />
-                        </ListItem>
-                      ))}
+                      {peakHoursData.insights.rushPeriods.map(
+                        (period, index) => (
+                          <ListItem key={index} sx={{ px: 0 }}>
+                            <ListItemText
+                              primary={`${period.startLabel} - ${period.endLabel}`}
+                              secondary={
+                                <Box>
+                                  <Typography variant="body2" component="span">
+                                    {period.orders} orders •{" "}
+                                    {formatCurrency(period.revenue)}
+                                  </Typography>
+                                  <br />
+                                  <Chip
+                                    label={`${period.duration}h duration`}
+                                    size="small"
+                                    variant="outlined"
+                                    color="warning"
+                                  />
+                                </Box>
+                              }
+                            />
+                          </ListItem>
+                        )
+                      )}
                     </List>
                   ) : (
                     <Typography variant="body2" color="text.secondary">
@@ -895,7 +1032,11 @@ export default function Dashboard() {
               {/* Business Insights */}
               <Card elevation={2}>
                 <CardContent>
-                  <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography
+                    variant="h6"
+                    gutterBottom
+                    sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                  >
                     <AnalyticsIcon />
                     Key Insights
                   </Typography>
@@ -906,10 +1047,12 @@ export default function Dashboard() {
                           Busiest Hour
                         </Typography>
                         <Typography variant="body1" fontWeight="bold">
-                          {peakHoursData.insights.busiestHour?.hourLabel || 'N/A'}
+                          {peakHoursData.insights.busiestHour?.hourLabel ||
+                            "N/A"}
                         </Typography>
                         <Typography variant="caption">
-                          {peakHoursData.insights.busiestHour?.orderCount || 0} orders
+                          {peakHoursData.insights.busiestHour?.orderCount || 0}{" "}
+                          orders
                         </Typography>
                       </Box>
 
@@ -918,10 +1061,13 @@ export default function Dashboard() {
                           Most Revenue Hour
                         </Typography>
                         <Typography variant="body1" fontWeight="bold">
-                          {peakHoursData.insights.mostRevenueHour?.hourLabel || 'N/A'}
+                          {peakHoursData.insights.mostRevenueHour?.hourLabel ||
+                            "N/A"}
                         </Typography>
                         <Typography variant="caption">
-                          {formatCurrency(peakHoursData.insights.mostRevenueHour?.revenue || 0)}
+                          {formatCurrency(
+                            peakHoursData.insights.mostRevenueHour?.revenue || 0
+                          )}
                         </Typography>
                       </Box>
 
@@ -930,7 +1076,9 @@ export default function Dashboard() {
                           Average Orders/Hour
                         </Typography>
                         <Typography variant="body1" fontWeight="bold">
-                          {peakHoursData.insights.averageOrdersPerHour?.toFixed(1) || '0.0'}
+                          {peakHoursData.insights.averageOrdersPerHour?.toFixed(
+                            1
+                          ) || "0.0"}
                         </Typography>
                       </Box>
 
@@ -940,7 +1088,8 @@ export default function Dashboard() {
                             Quiet Hours
                           </Typography>
                           <Typography variant="caption">
-                            {peakHoursData.insights.quietHours.length} hours with no orders
+                            {peakHoursData.insights.quietHours.length} hours
+                            with no orders
                           </Typography>
                         </Box>
                       )}

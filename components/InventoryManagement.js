@@ -31,20 +31,22 @@ import FilterListIcon from "@mui/icons-material/FilterList";
 import ClearIcon from "@mui/icons-material/Clear";
 import WarningIcon from "@mui/icons-material/Warning";
 import AddIngredientDialog from "./AddIngredientDialog";
+import AddPackageDialog from "./AddPackageDialog";
 import EditIngredientDialog from "./EditIngredientDialog";
 import { getUnitDisplayText, ALL_UNITS } from "../lib/units";
 import { useSelector } from "react-redux";
 
 export default function InventoryManagement() {
-  const [ingredients, setIngredients] = useState([]);
-  const [filteredIngredients, setFilteredIngredients] = useState([]);
+  const [inventory, setInventory] = useState([]);
+  const [filteredInventory, setFilteredInventory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [addIngredientOpen, setAddIngredientOpen] = useState(false);
+  const [addPackageOpen, setAddPackageOpen] = useState(false);
   const [editIngredientOpen, setEditIngredientOpen] = useState(false);
   const [selectedIngredient, setSelectedIngredient] = useState(null);
   const [deleteError, setDeleteError] = useState(null);
-  
+
   // Search and Filter states
   const [searchQuery, setSearchQuery] = useState("");
   const [unitFilter, setUnitFilter] = useState("");
@@ -53,22 +55,54 @@ export default function InventoryManagement() {
   const [lowStockThreshold, setLowStockThreshold] = useState(10);
   const [sortBy, setSortBy] = useState("name");
   const [sortOrder, setSortOrder] = useState("asc");
-  
+
   const user = useSelector((state) => state.user);
 
-  const fetchIngredients = async () => {
+  const fetchInventoryData = async () => {
     try {
-      const res = await fetch("/api/inventory");
-      if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
-      } else {
-        const data = await res.json();
-        setIngredients(data);
-        setFilteredIngredients(data);
+      setLoading(true);
+      setError(null);
+      const [ingredientsRes, packagingRes] = await Promise.all([
+        fetch("/api/inventory"),
+        fetch("/api/packaging"),
+      ]);
+
+      if (!ingredientsRes.ok) {
+        setError(
+          new Error(`Failed to fetch ingredients: ${ingredientsRes.statusText}`)
+        );
+        setInventory([]);
+        return;
       }
+      if (!packagingRes.ok) {
+        setError(
+          new Error(`Failed to fetch packaging: ${packagingRes.statusText}`)
+        );
+        setInventory([]);
+        return;
+      }
+
+      const ingredientsData = await ingredientsRes.json();
+      const packagingData = await packagingRes.json();
+
+      const ingredients = ingredientsData.map((item) => ({
+        ...item,
+        category: "Ingredient",
+      }));
+
+      const packaging = packagingData.map((item) => ({
+        ...item,
+        name: item.type, // map type to name for consistency
+        unit: "package", // packages don't have a unit, so we'll use this
+        category: "Package",
+      }));
+
+      const combinedData = [...ingredients, ...packaging];
+      setInventory(combinedData);
     } catch (error) {
-      console.error("Failed to fetch ingredients:", error);
+      console.error("Failed to fetch inventory data:", error);
       setError(error);
+      setInventory([]);
     } finally {
       setLoading(false);
     }
@@ -76,31 +110,35 @@ export default function InventoryManagement() {
 
   // Filter and Search Logic
   useEffect(() => {
-    let filtered = [...ingredients];
+    let filtered = [...inventory];
 
     // Search filter
     if (searchQuery) {
-      filtered = filtered.filter(ingredient =>
-        ingredient.name.toLowerCase().includes(searchQuery.toLowerCase())
+      filtered = filtered.filter((item) =>
+        item.name.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
     // Unit filter
     if (unitFilter) {
-      filtered = filtered.filter(ingredient => ingredient.unit === unitFilter);
+      filtered = filtered.filter((item) => item.unit === unitFilter);
     }
 
     // Stock level filter
     if (stockFilter) {
       switch (stockFilter) {
         case "low":
-          filtered = filtered.filter(ingredient => ingredient.currentStock < lowStockThreshold);
+          filtered = filtered.filter(
+            (item) => item.currentStock < lowStockThreshold
+          );
           break;
         case "out":
-          filtered = filtered.filter(ingredient => ingredient.currentStock === 0);
+          filtered = filtered.filter((item) => item.currentStock === 0);
           break;
         case "normal":
-          filtered = filtered.filter(ingredient => ingredient.currentStock >= lowStockThreshold);
+          filtered = filtered.filter(
+            (item) => item.currentStock >= lowStockThreshold
+          );
           break;
         default:
           break;
@@ -111,15 +149,15 @@ export default function InventoryManagement() {
     if (costFilter) {
       switch (costFilter) {
         case "low":
-          filtered = filtered.filter(ingredient => ingredient.costPerUnit < 0.01);
+          filtered = filtered.filter((item) => item.costPerUnit < 0.01);
           break;
         case "medium":
-          filtered = filtered.filter(ingredient => 
-            ingredient.costPerUnit >= 0.01 && ingredient.costPerUnit < 0.1
+          filtered = filtered.filter(
+            (item) => item.costPerUnit >= 0.01 && item.costPerUnit < 0.1
           );
           break;
         case "high":
-          filtered = filtered.filter(ingredient => ingredient.costPerUnit >= 0.1);
+          filtered = filtered.filter((item) => item.costPerUnit >= 0.1);
           break;
         default:
           break;
@@ -158,11 +196,20 @@ export default function InventoryManagement() {
       }
     });
 
-    setFilteredIngredients(filtered);
-  }, [ingredients, searchQuery, unitFilter, stockFilter, costFilter, lowStockThreshold, sortBy, sortOrder]);
+    setFilteredInventory(filtered);
+  }, [
+    inventory,
+    searchQuery,
+    unitFilter,
+    stockFilter,
+    costFilter,
+    lowStockThreshold,
+    sortBy,
+    sortOrder,
+  ]);
 
   useEffect(() => {
-    fetchIngredients();
+    fetchInventoryData();
   }, []);
 
   const handleAddIngredientOpen = () => {
@@ -171,6 +218,14 @@ export default function InventoryManagement() {
 
   const handleAddIngredientClose = () => {
     setAddIngredientOpen(false);
+  };
+
+  const handleAddPackageOpen = () => {
+    setAddPackageOpen(true);
+  };
+
+  const handleAddPackageClose = () => {
+    setAddPackageOpen(false);
   };
 
   const handleEditIngredientOpen = (ingredient) => {
@@ -183,9 +238,13 @@ export default function InventoryManagement() {
     setEditIngredientOpen(false);
   };
 
-  const handleDelete = async (ingredientId) => {
+  const handleDelete = async (item) => {
     setDeleteError(null);
-    const res = await fetch(`/api/inventory/${ingredientId}`, {
+    const endpoint =
+      item.category === "Ingredient"
+        ? `/api/inventory/${item.id}`
+        : `/api/packaging/${item.id}`;
+    const res = await fetch(endpoint, {
       method: "DELETE",
     });
 
@@ -193,7 +252,7 @@ export default function InventoryManagement() {
       const data = await res.json();
       setDeleteError(data.message || `HTTP error! status: ${res.status}`);
     } else {
-      fetchIngredients();
+      fetchInventoryData();
     }
   };
 
@@ -225,38 +284,59 @@ export default function InventoryManagement() {
   };
 
   const getLowStockItems = () => {
-    return ingredients.filter(ingredient => ingredient.currentStock < lowStockThreshold && ingredient.currentStock > 0);
+    return inventory.filter(
+      (item) => item.currentStock < lowStockThreshold && item.currentStock > 0
+    );
   };
 
   const getOutOfStockItems = () => {
-    return ingredients.filter(ingredient => ingredient.currentStock === 0);
+    return inventory.filter((item) => item.currentStock === 0);
   };
 
   if (loading) {
     return <div>Loading inventory...</div>;
   }
 
-  if (error) {
-    return <Alert severity="error">Error: {error.message}</Alert>;
-  }
-
   return (
     <div>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography variant="h4" component="h1">
-          Inventory Management
-        </Typography>
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<AddIcon />}
-          onClick={handleAddIngredientOpen}
-        >
-          Add Ingredient
-        </Button>
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          Error: {error.message}
+        </Alert>
+      )}
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={3}
+      >
+        <Typography variant="h4" component="h1"></Typography>
+        <Box>
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<AddIcon />}
+            onClick={handleAddIngredientOpen}
+            sx={{ mr: 1 }}
+          >
+            Add Ingredient
+          </Button>
+          <Button
+            variant="contained"
+            color="secondary"
+            startIcon={<AddIcon />}
+            onClick={handleAddPackageOpen}
+          >
+            Add Package
+          </Button>
+        </Box>
       </Box>
 
-      {deleteError && <Alert severity="error" sx={{ mb: 2 }}>{deleteError}</Alert>}
+      {deleteError && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {deleteError}
+        </Alert>
+      )}
 
       {/* Stock Alerts */}
       {(getOutOfStockItems().length > 0 || getLowStockItems().length > 0) && (
@@ -266,8 +346,10 @@ export default function InventoryManagement() {
               <Box display="flex" alignItems="center">
                 <WarningIcon sx={{ mr: 1 }} />
                 <Typography variant="body2">
-                  {getOutOfStockItems().length} item(s) out of stock: {' '}
-                  {getOutOfStockItems().map(item => item.name).join(', ')}
+                  {getOutOfStockItems().length} item(s) out of stock:{" "}
+                  {getOutOfStockItems()
+                    .map((item) => item.name)
+                    .join(", ")}
                 </Typography>
               </Box>
             </Alert>
@@ -277,8 +359,10 @@ export default function InventoryManagement() {
               <Box display="flex" alignItems="center">
                 <WarningIcon sx={{ mr: 1 }} />
                 <Typography variant="body2">
-                  {getLowStockItems().length} item(s) low in stock: {' '}
-                  {getLowStockItems().map(item => `${item.name} (${item.currentStock})`).join(', ')}
+                  {getLowStockItems().length} item(s) low in stock:{" "}
+                  {getLowStockItems()
+                    .map((item) => `${item.name} (${item.currentStock})`)
+                    .join(", ")}
                 </Typography>
               </Box>
             </Alert>
@@ -295,7 +379,7 @@ export default function InventoryManagement() {
                 Total Items
               </Typography>
               <Typography variant="h5" component="div">
-                {ingredients.length}
+                {inventory.length}
               </Typography>
             </CardContent>
           </Card>
@@ -331,7 +415,7 @@ export default function InventoryManagement() {
                 Filtered Results
               </Typography>
               <Typography variant="h5" component="div">
-                {filteredIngredients.length}
+                {filteredInventory.length}
               </Typography>
             </CardContent>
           </Card>
@@ -341,10 +425,10 @@ export default function InventoryManagement() {
       {/* Search and Filter Controls */}
       <Paper sx={{ p: 2, mb: 3 }}>
         <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} md={4}>
+          <Grid item xs={12} md={3}>
             <TextField
               fullWidth
-              placeholder="Search ingredients..."
+              placeholder="Search items..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               InputProps={{
@@ -356,9 +440,9 @@ export default function InventoryManagement() {
               }}
             />
           </Grid>
-          
-          <Grid item xs={12} sm={6} md={2}>
-            <FormControl fullWidth>
+
+          <Grid item>
+            <FormControl sx={{ m: 1, minWidth: 80 }}>
               <InputLabel>Unit</InputLabel>
               <Select
                 value={unitFilter}
@@ -366,17 +450,19 @@ export default function InventoryManagement() {
                 onChange={(e) => setUnitFilter(e.target.value)}
               >
                 <MenuItem value="">All Units</MenuItem>
-                {[...new Set(ingredients.map(ing => ing.unit))].map(unit => (
-                  <MenuItem key={unit} value={unit}>
-                    {getUnitDisplayText(unit)}
-                  </MenuItem>
-                ))}
+                {[...new Set(inventory.map((item) => item.unit))].map(
+                  (unit) => (
+                    <MenuItem key={unit} value={unit}>
+                      {getUnitDisplayText(unit)}
+                    </MenuItem>
+                  )
+                )}
               </Select>
             </FormControl>
           </Grid>
 
-          <Grid item xs={12} sm={6} md={2}>
-            <FormControl fullWidth>
+          <Grid item>
+            <FormControl sx={{ m: 1, minWidth: 120 }}>
               <InputLabel>Stock Level</InputLabel>
               <Select
                 value={stockFilter}
@@ -391,8 +477,8 @@ export default function InventoryManagement() {
             </FormControl>
           </Grid>
 
-          <Grid item xs={12} sm={6} md={2}>
-            <FormControl fullWidth>
+          <Grid item>
+            <FormControl sx={{ m: 1, minWidth: 80 }}>
               <InputLabel>Cost Range</InputLabel>
               <Select
                 value={costFilter}
@@ -407,7 +493,7 @@ export default function InventoryManagement() {
             </FormControl>
           </Grid>
 
-          <Grid item xs={12} sm={6} md={2}>
+          <Grid item xs={12} sm={6} md={1}>
             <Box display="flex" gap={1}>
               <Button
                 variant="outlined"
@@ -528,6 +614,7 @@ export default function InventoryManagement() {
                   Name
                 </TableSortLabel>
               </TableCell>
+              <TableCell>Category</TableCell>
               <TableCell align="right">
                 <TableSortLabel
                   active={sortBy === "unit"}
@@ -559,84 +646,107 @@ export default function InventoryManagement() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {filteredIngredients.length === 0 ? (
+            {filteredInventory.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} align="center">
+                <TableCell colSpan={6} align="center">
                   <Typography variant="body2" color="textSecondary" py={4}>
-                    {ingredients.length === 0 
-                      ? "No ingredients found. Add your first ingredient to get started."
-                      : "No ingredients match your current filters. Try adjusting your search criteria."
-                    }
+                    {inventory.length === 0
+                      ? "No items found. Add your first ingredient or package to get started."
+                      : "No items match your current filters. Try adjusting your search criteria."}
                   </Typography>
                 </TableCell>
               </TableRow>
             ) : (
-              filteredIngredients.map((ingredient) => (
+              filteredInventory.map((item) => (
                 <TableRow
-                  key={ingredient.id}
-                  sx={{ 
+                  key={item.id}
+                  sx={{
                     "&:last-child td, &:last-child th": { border: 0 },
-                    backgroundColor: ingredient.currentStock === 0 
-                      ? "error.light" 
-                      : ingredient.currentStock < lowStockThreshold 
-                      ? "warning.light" 
-                      : "inherit",
+                    backgroundColor:
+                      item.currentStock === 0
+                        ? "error.light"
+                        : item.currentStock < lowStockThreshold
+                        ? "warning.light"
+                        : "inherit",
                     "&:hover": {
-                      backgroundColor: ingredient.currentStock === 0 
-                        ? "error.main" 
-                        : ingredient.currentStock < lowStockThreshold 
-                        ? "warning.main" 
-                        : "action.hover",
-                    }
+                      backgroundColor:
+                        item.currentStock === 0
+                          ? "error.main"
+                          : item.currentStock < lowStockThreshold
+                          ? "warning.main"
+                          : "action.hover",
+                    },
                   }}
                 >
                   <TableCell component="th" scope="row">
                     <Box display="flex" alignItems="center">
-                      {ingredient.currentStock === 0 && (
-                        <WarningIcon color="error" sx={{ mr: 1, fontSize: 20 }} />
+                      {item.currentStock === 0 && (
+                        <WarningIcon
+                          color="error"
+                          sx={{ mr: 1, fontSize: 20 }}
+                        />
                       )}
-                      {ingredient.currentStock > 0 && ingredient.currentStock < lowStockThreshold && (
-                        <WarningIcon color="warning" sx={{ mr: 1, fontSize: 20 }} />
-                      )}
-                      {ingredient.name}
+                      {item.currentStock > 0 &&
+                        item.currentStock < lowStockThreshold && (
+                          <WarningIcon
+                            color="warning"
+                            sx={{ mr: 1, fontSize: 20 }}
+                          />
+                        )}
+                      {item.name}
                     </Box>
                   </TableCell>
-                  <TableCell align="right">
-                    {getUnitDisplayText(ingredient.unit)}
+                  <TableCell>
+                    <Chip
+                      label={item.category}
+                      size="small"
+                      color={
+                        item.category === "Package" ? "secondary" : "default"
+                      }
+                    />
                   </TableCell>
                   <TableCell align="right">
-                    <Typography 
+                    {item.category === "Package"
+                      ? "N/A"
+                      : getUnitDisplayText(item.unit)}
+                  </TableCell>
+                  <TableCell align="right">
+                    <Typography
                       color={
-                        ingredient.currentStock === 0 
-                          ? "error" 
-                          : ingredient.currentStock < lowStockThreshold 
-                          ? "warning.main" 
+                        item.currentStock === 0
+                          ? "error"
+                          : item.currentStock < lowStockThreshold
+                          ? "warning.main"
                           : "inherit"
                       }
                       fontWeight={
-                        ingredient.currentStock <= lowStockThreshold ? "bold" : "normal"
+                        item.currentStock <= lowStockThreshold
+                          ? "bold"
+                          : "normal"
                       }
                     >
-                      {ingredient.currentStock}
+                      {item.currentStock}
                     </Typography>
                   </TableCell>
                   <TableCell align="right">
-                    ${ingredient.costPerUnit.toFixed(4)}
+                    ${item.costPerUnit.toFixed(4)}
                   </TableCell>
                   <TableCell align="right">
                     <Box display="flex" gap={1} justifyContent="flex-end">
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        size="small"
-                        onClick={() => handleEditIngredientOpen(ingredient)}
-                      >
-                        Edit
-                      </Button>
+                      {item.category === "Ingredient" && (
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          size="small"
+                          onClick={() => handleEditIngredientOpen(item)}
+                        >
+                          Edit
+                        </Button>
+                      )}
                       {user?.role === "ADMIN" && (
                         <IconButton
                           aria-label="delete"
-                          onClick={() => handleDelete(ingredient.id)}
+                          onClick={() => handleDelete(item)}
                           size="small"
                         >
                           <DeleteIcon />
@@ -653,13 +763,18 @@ export default function InventoryManagement() {
       <AddIngredientDialog
         open={addIngredientOpen}
         onClose={handleAddIngredientClose}
-        refreshIngredients={fetchIngredients}
+        refreshIngredients={fetchInventoryData}
+      />
+      <AddPackageDialog
+        open={addPackageOpen}
+        onClose={handleAddPackageClose}
+        refreshPackaging={fetchInventoryData}
       />
       <EditIngredientDialog
         open={editIngredientOpen}
         onClose={handleEditIngredientClose}
         ingredient={selectedIngredient}
-        refreshIngredients={fetchIngredients}
+        refreshIngredients={fetchInventoryData}
       />
     </div>
   );
