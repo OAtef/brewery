@@ -23,7 +23,22 @@ const theme = createTheme({
   },
 });
 
-export default function MyApp({ Component, pageProps }) {
+export default function MyApp({ Component, pageProps, router }) {
+  if (router.pathname === "/landing") {
+    return (
+      <Provider store={store}>
+        <AuthProvider>
+          <NotificationProvider>
+            <ThemeProvider theme={theme}>
+              <CssBaseline />
+              <Component {...pageProps} />
+            </ThemeProvider>
+          </NotificationProvider>
+        </AuthProvider>
+      </Provider>
+    );
+  }
+
   return (
     <Provider store={store}>
       <AuthProvider>

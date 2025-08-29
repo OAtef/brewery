@@ -6,8 +6,8 @@ export default async function handler(req, res) {
   try {
     if (req.method === "GET") {
       // Get a single packaging option by id
-      const packaging = await prisma.packaging.findUnique({
-        where: { id: parseInt(id) },
+      const packaging = await prisma.packaging.findFirst({
+        where: { id: parseInt(id), isDeleted: false },
       });
 
       if (!packaging) {
@@ -30,9 +30,10 @@ export default async function handler(req, res) {
 
       res.status(200).json(updatedPackaging);
     } else if (req.method === "DELETE") {
-      // Delete a packaging option
-      await prisma.packaging.delete({
+      // Soft delete a packaging option
+      await prisma.packaging.update({
         where: { id: parseInt(id) },
+        data: { isDeleted: true },
       });
 
       res.status(204).end();
