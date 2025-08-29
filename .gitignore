@@ -1,2 +1,11 @@
 # Ignore node_modules folder
 node_modules/
+
+# Ignore environment variables
+.env
+
+# Ignore Next.js build directory
+.next/
+
+# Ignore generated Prisma client
+prisma/generated/
