@@ -169,6 +169,8 @@ const HomePage = () => {
   return (
     <>
       <Head>
+        <title>The Brewery</title>
+        <link rel="icon" href="/logo.png" />
         <style>{`
           @font-face {
             font-family: 'Stinger';
@@ -218,7 +220,16 @@ const HomePage = () => {
             borderRadius: "8px",
           }}
         >
-          <Grid item>
+          <Grid
+            item
+            style={{ borderRadius: "8px" }}
+            onClick={() =>
+              window.open(
+                "https://www.facebook.com/people/The-Brewery/61579416881941/",
+                "_blank"
+              )
+            }
+          >
             <IconButton href="#">
               <img
                 src="/facebooklogo.png"
@@ -227,7 +238,16 @@ const HomePage = () => {
               />
             </IconButton>
           </Grid>
-          <Grid item>
+          <Grid
+            item
+            style={{ borderRadius: "8px" }}
+            onClick={() =>
+              window.open(
+                "https://www.instagram.com/thebrewery.coffee/",
+                "_blank"
+              )
+            }
+          >
             <IconButton href="#">
               <img
                 src="/instgramlogo.png"

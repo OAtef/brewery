@@ -7,5 +7,8 @@ node_modules/
 # Ignore Next.js build directory
 .next/
 
+# Ignore static export directory
+/out/
+
 # Ignore generated Prisma client
 prisma/generated/
