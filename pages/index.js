@@ -2,6 +2,7 @@ import Head from "next/head";
 import React, { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { Container, Box, Typography, Grid, IconButton } from "@mui/material";
 
@@ -88,8 +89,11 @@ const HomePage = () => {
 
     // GLTF Loader
     const loader = new GLTFLoader();
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath("https://www.gstatic.com/draco/v1/decoders/");
+    loader.setDRACOLoader(dracoLoader);
     loader.load(
-      "/NewPlaceWithLogo.glb",
+      "/NewPlaceWithLogo-opt2.glb",
       (gltf) => {
         const model = gltf.scene;
         model.rotation.y = -Math.PI / 1.6;
@@ -97,7 +101,7 @@ const HomePage = () => {
           if (
             child.isMesh &&
             child.material &&
-            child.material.name === "Material.001"
+            child.material.name === "Material.002"
           ) {
             child.material = videoMaterial;
           }
@@ -178,7 +182,7 @@ const HomePage = () => {
           }
           body {
             background-color: #F9F3e5;
-            background-image: url('/background.png');
+            background-image: url('/background_lower.png');
             background-repeat: repeat;
             background-size: 400px 200px;
           }
