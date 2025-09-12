@@ -36,9 +36,15 @@ const HomePage = () => {
 
     // Video Texture
     const video = document.createElement("video");
-    video.src = "/bamoot.mp4";
+    fetch("/videos.txt")
+      .then((response) => response.text())
+      .then((text) => {
+        const videoSources = text.trim().split("\n");
+        const randomVideoSource =
+          videoSources[Math.floor(Math.random() * videoSources.length)];
+        video.src = randomVideoSource;
+      });
     video.autoplay = true;
-    video.loop = true;
     video.muted = true;
     video.playsInline = true;
     video.load();
@@ -273,7 +279,7 @@ const HomePage = () => {
         <Box
           ref={mountRef}
           sx={{
-            width: "80%",
+            width: "75%",
             height: "50vh",
             position: "relative",
           }}
