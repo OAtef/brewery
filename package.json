@@ -13,8 +13,8 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate deploy",
     "db:reset": "prisma migrate reset --force",
-    "db:seed": "node seed-database.js",
-    "db:admin": "node ensure-admin.js",
+    "db:seed": "node scripts/database/seed-database.js",
+    "db:admin": "node scripts/database/ensure-admin.js",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "type-check": "tsc --noEmit"

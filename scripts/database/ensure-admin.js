@@ -4,7 +4,7 @@
  * Can be run independently if needed
  */
 
-const { PrismaClient } = require('./prisma/generated/prisma');
+const { PrismaClient } = require('@prisma/client');
 
 async function ensureAdminUser() {
   const prisma = new PrismaClient();
