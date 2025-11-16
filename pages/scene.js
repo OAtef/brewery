@@ -1,10 +1,10 @@
 // pages/scene.js
 import dynamic from "next/dynamic";
 import { CircularProgress, Container, Typography, Box } from "@mui/material";
-import ClientProtectedRoute from "../components/ClientProtectedRoute";
+import ClientProtectedRoute from "../components/auth/ClientProtectedRoute";
 
 // Lazy-load ThreeScene without SSR (important for browser-only APIs)
-const ThreeScene = dynamic(() => import("../components/ThreeScene"), {
+const ThreeScene = dynamic(() => import("../components/3d/ThreeScene"), {
   ssr: false,
   loading: () => (
     <Box

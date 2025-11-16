@@ -1,12 +1,12 @@
 // pages/_app.js
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
-import Layout from "../components/Layout";
+import Layout from "../components/layout/Layout";
 import { Provider } from "react-redux";
 import { store } from "../lib/redux/store";
 
 import { AuthProvider } from "../lib/auth";
-import { NotificationProvider } from "../components/NotificationProvider";
+import { NotificationProvider } from "../components/layout/NotificationProvider";
 
 const theme = createTheme({
   palette: {

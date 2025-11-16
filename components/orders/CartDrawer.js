@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import { Add, Remove, Delete } from "@mui/icons-material";
 import { useSelector, useDispatch } from "react-redux";
-import { clearCart, removeProduct, updateQuantity } from "../lib/redux/cartSlice";
+import { clearCart, removeProduct, updateQuantity } from "../../lib/redux/cartSlice";
 
 export default function CartDrawer({ open, onClose }) {
   const cart = useSelector((state) => state.cart.products);

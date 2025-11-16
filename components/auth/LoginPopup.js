@@ -16,7 +16,7 @@ import {
   Select,
   MenuItem,
 } from "@mui/material";
-import { useAuth } from "../lib/auth";
+import { useAuth } from "../../lib/auth";
 
 export default function LoginPopup({ open, onClose }) {
   const { login } = useAuth();

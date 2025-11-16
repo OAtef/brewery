@@ -1,5 +1,5 @@
-import InventoryManagement from "../../components/InventoryManagement";
-import ClientProtectedRoute from "../../components/ClientProtectedRoute";
+import InventoryManagement from "../../components/inventory/InventoryManagement";
+import ClientProtectedRoute from "../../components/auth/ClientProtectedRoute";
 
 export default function InventoryPage() {
   console.log("Component: InventoryPage");

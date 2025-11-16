@@ -59,11 +59,11 @@ import {
   Legend,
 } from "chart.js";
 import { Bar, Line } from "react-chartjs-2";
-import LowStockWarnings from "../components/LowStockWarnings";
-import WasteTracking from "../components/WasteTracking";
-import CostAnalysis from "../components/CostAnalysis";
-import OrderProcessingTime from "../components/OrderProcessingTime";
-import RevenueTrends from "../components/RevenueTrends";
+import LowStockWarnings from "../components/analytics/LowStockWarnings";
+import WasteTracking from "../components/analytics/WasteTracking";
+import CostAnalysis from "../components/analytics/CostAnalysis";
+import OrderProcessingTime from "../components/analytics/OrderProcessingTime";
+import RevenueTrends from "../components/analytics/RevenueTrends";
 
 ChartJS.register(
   CategoryScale,

@@ -1,5 +1,5 @@
-import RecipeManagement from "../../components/RecipeManagement";
-import ClientProtectedRoute from "../../components/ClientProtectedRoute";
+import RecipeManagement from "../../components/recipes/RecipeManagement";
+import ClientProtectedRoute from "../../components/auth/ClientProtectedRoute";
 
 export default function RecipesPage() {
   console.log("Component: RecipesPage");

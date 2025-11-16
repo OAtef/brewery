@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useAuth } from '../lib/auth';
+import { useAuth } from '../../lib/auth';
 import dynamic from 'next/dynamic';
 import { 
   Box, 

@@ -13,7 +13,7 @@ import {
   MenuItem,
   ListSubheader,
 } from "@mui/material";
-import { getUnitsWithCategories } from "../lib/units";
+import { getUnitsWithCategories } from "../../lib/units";
 import PropTypes from "prop-types";
 
 export default function AddIngredientDialog({

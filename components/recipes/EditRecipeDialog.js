@@ -14,44 +14,40 @@ import {
   Typography,
   Box,
   Grid,
-  Autocomplete,
   Alert,
 } from "@mui/material";
 import { Add as AddIcon, Delete as DeleteIcon } from "@mui/icons-material";
-import { getUnitDisplayText } from "../lib/units";
+import { getUnitDisplayText } from "../../lib/units";
 
-export default function AddRecipeDialog({ open, onClose, onRecipeAdded }) {
+export default function EditRecipeDialog({
+  open,
+  onClose,
+  recipe,
+  onRecipeUpdated,
+}) {
   const [formData, setFormData] = useState({
-    productId: "",
     variant: "",
     ingredients: [{ ingredientId: "", quantity: "" }],
   });
-  const [products, setProducts] = useState([]);
   const [ingredients, setIngredients] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (open) {
-      fetchProducts();
+    if (open && recipe) {
+      setFormData({
+        variant: recipe.variant || "",
+        ingredients:
+          recipe.ingredients?.length > 0
+            ? recipe.ingredients.map((ri) => ({
+                ingredientId: ri.ingredientId.toString(),
+                quantity: ri.quantity.toString(),
+              }))
+            : [{ ingredientId: "", quantity: "" }],
+      });
       fetchIngredients();
     }
-  }, [open]);
-
-  const fetchProducts = async () => {
-    try {
-      const res = await fetch("/api/products");
-      if (res.ok) {
-        const data = await res.json();
-        setProducts(data);
-      } else {
-        throw new Error("Failed to fetch products");
-      }
-    } catch (error) {
-      setError(error.message || "Failed to fetch products");
-      console.error("Failed to fetch products:", error);
-    }
-  };
+  }, [open, recipe]);
 
   const fetchIngredients = async () => {
     try {
@@ -113,7 +109,7 @@ export default function AddRecipeDialog({ open, onClose, onRecipeAdded }) {
     try {
       setError("");
       // Validate form
-      if (!formData.productId || !formData.variant) {
+      if (!formData.variant) {
         setError("Please fill in all required fields");
         return;
       }
@@ -127,11 +123,10 @@ export default function AddRecipeDialog({ open, onClose, onRecipeAdded }) {
         return;
       }
 
-      const res = await fetch("/api/recipes", {
-        method: "POST",
+      const res = await fetch(`/api/recipes/${recipe.id}`, {
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          productId: parseInt(formData.productId),
           variant: formData.variant,
           ingredients: validIngredients.map((ing) => ({
             ingredientId: parseInt(ing.ingredientId),
@@ -141,33 +136,28 @@ export default function AddRecipeDialog({ open, onClose, onRecipeAdded }) {
       });
 
       if (res.ok) {
-        const newRecipe = await res.json();
-        onRecipeAdded(newRecipe);
-        handleClose();
+        const updatedRecipe = await res.json();
+        onRecipeUpdated(updatedRecipe);
+        onClose();
       } else {
         const errorData = await res.json();
-        setError(errorData.error || "Failed to create recipe");
+        setError(errorData.error || "Failed to update recipe");
       }
     } catch (error) {
-      console.error("Failed to create recipe:", error);
-      setError("Failed to create recipe");
+      console.error("Failed to update recipe:", error);
+      setError("Failed to update recipe");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleClose = () => {
-    setFormData({
-      productId: "",
-      variant: "",
-      ingredients: [{ ingredientId: "", quantity: "" }],
-    });
-    onClose();
-  };
+  if (!recipe) return null;
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
-      <DialogTitle>Add New Recipe</DialogTitle>
+    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+      <DialogTitle>
+        Edit Recipe: {recipe.product?.name} - {recipe.variant}
+      </DialogTitle>
       <form onSubmit={handleSubmit}>
         <DialogContent>
           {error && (
@@ -176,28 +166,7 @@ export default function AddRecipeDialog({ open, onClose, onRecipeAdded }) {
             </Alert>
           )}
           <Grid container spacing={2}>
-            <Grid item>
-              <FormControl fullWidth margin="normal">
-                <Select
-                  value={formData.productId}
-                  onChange={(e) =>
-                    handleInputChange("productId", e.target.value)
-                  }
-                  required
-                  displayEmpty
-                >
-                  <MenuItem value="" disabled>
-                    <em>Select Product</em>
-                  </MenuItem>
-                  {products.map((product) => (
-                    <MenuItem key={product.id} value={product.id}>
-                      {product.name} ({product.category})
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item>
+            <Grid item xs={12}>
               <TextField
                 label="Variant"
                 value={formData.variant}
@@ -270,9 +239,9 @@ export default function AddRecipeDialog({ open, onClose, onRecipeAdded }) {
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
+          <Button onClick={onClose}>Cancel</Button>
           <Button type="submit" variant="contained" disabled={loading}>
-            {loading ? "Creating..." : "Create Recipe"}
+            {loading ? "Updating..." : "Update Recipe"}
           </Button>
         </DialogActions>
       </form>

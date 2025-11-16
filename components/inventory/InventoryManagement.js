@@ -33,7 +33,7 @@ import WarningIcon from "@mui/icons-material/Warning";
 import AddIngredientDialog from "./AddIngredientDialog";
 import AddPackageDialog from "./AddPackageDialog";
 import EditIngredientDialog from "./EditIngredientDialog";
-import { getUnitDisplayText, ALL_UNITS } from "../lib/units";
+import { getUnitDisplayText, ALL_UNITS } from "../../lib/units";
 import { useSelector } from "react-redux";
 
 export default function InventoryManagement() {

@@ -21,9 +21,9 @@ import {
 } from "../../lib/redux/cartSlice";
 import { useAuth } from "../../lib/auth";
 import { useRouter } from "next/router";
-import ProductSelector from "../../components/ProductSelector";
-import CartDrawer from "../../components/CartDrawer";
-import { useNotification } from "../../components/NotificationProvider";
+import ProductSelector from "../../components/orders/ProductSelector";
+import CartDrawer from "../../components/orders/CartDrawer";
+import { useNotification } from "../../components/layout/NotificationProvider";
 
 export default function NewOrder() {
   const [products, setProducts] = useState([]);

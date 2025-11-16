@@ -9,8 +9,8 @@ import {
 } from "@mui/material";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import LoginPopup from "./LoginPopup";
-import { useAuth } from "../lib/auth"; // Assuming auth context is in lib/auth.js
+import LoginPopup from "../auth/LoginPopup";
+import { useAuth } from "../../lib/auth"; // Assuming auth context is in lib/auth.js
 
 export default function Layout({ children }) {
   const [loginOpen, setLoginOpen] = useState(false);
