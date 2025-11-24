@@ -25,6 +25,20 @@ export default async function handler(req, res) {
                 }
               },
               packaging: true,
+              selectedVariants: {
+                include: {
+                  variantOption: {
+                    include: {
+                      variantGroup: true
+                    }
+                  }
+                }
+              },
+              selectedExtras: {
+                include: {
+                  extra: true
+                }
+              },
             },
           },
         },
@@ -123,6 +137,20 @@ export default async function handler(req, res) {
                 }
               },
               packaging: true,
+              selectedVariants: {
+                include: {
+                  variantOption: {
+                    include: {
+                      variantGroup: true
+                    }
+                  }
+                }
+              },
+              selectedExtras: {
+                include: {
+                  extra: true
+                }
+              },
             },
           },
         },

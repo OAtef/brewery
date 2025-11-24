@@ -191,7 +191,7 @@ export default function AddRecipeDialog({ open, onClose, onRecipeAdded }) {
                   </MenuItem>
                   {products.map((product) => (
                     <MenuItem key={product.id} value={product.id}>
-                      {product.name} ({product.category})
+                      {product.name} ({typeof product.category === 'object' ? product.category?.name : product.category})
                     </MenuItem>
                   ))}
                 </Select>

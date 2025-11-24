@@ -4,9 +4,19 @@ import { calculateRecipeCost, PRICING_CONFIG } from "../../../lib/pricing";
 export default async function handler(req, res) {
   try {
     if (req.method === "GET") {
-      // Get all products with their recipes and ingredients
+      console.log('[API] GET /api/products request received');
+      // Disable caching to ensure fresh data
+      res.setHeader('Cache-Control', 'no-store, max-age=0');
+
+      // Get all products with their recipes, ingredients, category, and variants
       const products = await prisma.product.findMany({
         include: {
+          category: true,
+          variantGroups: {
+            include: {
+              options: true,
+            },
+          },
           recipes: {
             include: {
               ingredients: {
@@ -27,9 +37,11 @@ export default async function handler(req, res) {
         const recipesWithPricing = product.recipes.map(recipe => {
           // Only calculate pricing for recipes with ingredients
           if (recipe.ingredients.length > 0) {
-            const category = product.category.toLowerCase();
-            const pricingOptions = PRICING_CONFIG[category] || PRICING_CONFIG.coffee;
-            
+            // Use category name from relation or fallback to string/default
+            const categoryName = product.category?.name || product.categoryName || 'coffee';
+            const categoryKey = categoryName.toLowerCase();
+            const pricingOptions = PRICING_CONFIG[categoryKey] || PRICING_CONFIG.coffee;
+
             const costBreakdown = calculateRecipeCost(recipe.ingredients, pricingOptions);
             const finalPrice = costBreakdown.sellingPrice + (recipe.priceModifier || 0);
 
@@ -62,22 +74,61 @@ export default async function handler(req, res) {
       res.status(200).json(productsWithPricing);
     } else if (req.method === "POST") {
       // Create a new product
-      const { name, category, description, basePrice = 0 } = req.body;
+      const { name, category, description, basePrice = 0, variantGroups = [] } = req.body;
 
-      if (!name || !category) {
+      if (!name) {
         return res
           .status(400)
-          .json({ error: "Name and category are required" });
+          .json({ error: "Name is required" });
       }
 
+      // Handle Category:
+      // 1. If category is an ID (int), connect it.
+      // 2. If category is a String, try to find it or create it (or fail if strict).
+      // For simplicity, let's assume if it's a string, we try to findByName or create.
+
+      let categoryConnect = {};
+      if (typeof category === 'number') {
+        categoryConnect = { connect: { id: category } };
+      } else if (typeof category === 'string') {
+        // Try to find existing category by name, or create if not exists
+        // Note: upsert requires a unique constraint on name, which we added.
+        categoryConnect = {
+          connectOrCreate: {
+            where: { name: category },
+            create: { name: category },
+          }
+        };
+      }
+
+      const productData = {
+        name,
+        description,
+        basePrice: parseFloat(basePrice),
+        category: categoryConnect,
+        categoryName: typeof category === 'string' ? category : undefined, // Keep sync
+        variantGroups: {
+          create: variantGroups.map(group => ({
+            name: group.name,
+            options: {
+              create: group.options.map(option => ({
+                name: option.name,
+                priceAdjustment: parseFloat(option.priceAdjustment || 0),
+              }))
+            }
+          }))
+        }
+      };
+
       const product = await prisma.product.create({
-        data: {
-          name,
-          category,
-          description,
-          basePrice,
-        },
+        data: productData,
         include: {
+          category: true,
+          variantGroups: {
+            include: {
+              options: true
+            }
+          },
           recipes: {
             include: {
               ingredients: {

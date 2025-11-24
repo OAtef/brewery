@@ -73,8 +73,8 @@ export default function NewOrder() {
   };
 
   const handleProductSelect = (selection) => {
-    dispatch(addProduct({ 
-      product: selectedProduct, 
+    dispatch(addProduct({
+      product: selectedProduct,
       variant: selection.variant,
       packaging: selection.packaging,
       price: selection.price
@@ -133,7 +133,7 @@ export default function NewOrder() {
         // Handle specific error cases
         if (res.status === 400 && data.error === "Invalid user ID") {
           showError(
-            "Your session appears to be invalid. You will be logged out automatically.", 
+            "Your session appears to be invalid. You will be logged out automatically.",
             "Session Expired"
           );
           // Auto-logout after showing error
@@ -142,7 +142,7 @@ export default function NewOrder() {
           }, 2000);
         } else {
           showError(
-            data.error || "An unexpected error occurred while creating your order.", 
+            data.error || "An unexpected error occurred while creating your order.",
             "Order Creation Failed"
           );
         }
@@ -150,7 +150,7 @@ export default function NewOrder() {
     } catch (error) {
       console.error("Failed to create order", error);
       showError(
-        "Network error occurred. Please check your connection and try again.", 
+        "Network error occurred. Please check your connection and try again.",
         "Network Error"
       );
     }
@@ -227,7 +227,7 @@ export default function NewOrder() {
                   {product.name}
                 </Typography>
                 <Typography sx={{ mb: 1.5 }} color="text.secondary">
-                  {product.category}
+                  {typeof product.category === 'object' ? product.category?.name : product.category}
                 </Typography>
               </CardContent>
               <CardActions sx={{ justifyContent: "center" }}>

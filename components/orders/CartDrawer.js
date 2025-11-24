@@ -49,7 +49,7 @@ export default function CartDrawer({ open, onClose }) {
         <Typography variant="h6" gutterBottom>
           Shopping Cart ({cart.length} items)
         </Typography>
-        
+
         {cart.length === 0 ? (
           <Typography variant="body2" color="text.secondary" sx={{ textAlign: "center", mt: 4 }}>
             Your cart is empty
@@ -77,8 +77,8 @@ export default function CartDrawer({ open, onClose }) {
                       }
                     />
                     <Box sx={{ display: "flex", alignItems: "center", mt: 1 }}>
-                      <IconButton 
-                        size="small" 
+                      <IconButton
+                        size="small"
                         onClick={() => handleRemoveItem(item)}
                       >
                         <Remove />
@@ -91,14 +91,14 @@ export default function CartDrawer({ open, onClose }) {
                         sx={{ width: 60, mx: 1 }}
                         inputProps={{ min: 1 }}
                       />
-                      <IconButton 
-                        size="small" 
+                      <IconButton
+                        size="small"
                         onClick={() => handleQuantityChange(item, item.quantity + 1)}
                       >
                         <Add />
                       </IconButton>
-                      <IconButton 
-                        size="small" 
+                      <IconButton
+                        size="small"
                         color="error"
                         onClick={() => handleQuantityChange(item, 0)}
                         sx={{ ml: 1 }}
@@ -113,15 +113,15 @@ export default function CartDrawer({ open, onClose }) {
                 </ListItem>
               ))}
             </List>
-            
+
             <Divider sx={{ my: 2 }} />
-            
+
             <Box sx={{ mb: 2 }}>
               <Typography variant="h6" sx={{ textAlign: "right" }}>
                 Total: ${calculateTotal().toFixed(2)}
               </Typography>
             </Box>
-            
+
             <Button
               variant="contained"
               color="secondary"

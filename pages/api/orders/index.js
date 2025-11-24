@@ -87,13 +87,25 @@ export default async function handler(req, res) {
         if (clientData.address && clientData.address.trim() !== "") {
           updateData.address = clientData.address;
         }
-        
+
         if (Object.keys(updateData).length > 0) {
           client = await prisma.client.update({
             where: { id: client.id },
             data: updateData,
           });
         }
+      }
+
+      // Ensure we have a default packaging to fall back to
+      let defaultPackaging = await prisma.packaging.findFirst();
+      if (!defaultPackaging) {
+        defaultPackaging = await prisma.packaging.create({
+          data: {
+            type: "Standard",
+            costPerUnit: 0.0,
+            currentStock: 1000,
+          },
+        });
       }
 
       const order = await prisma.order.create({
@@ -115,7 +127,19 @@ export default async function handler(req, res) {
               unitPrice: p.unitPrice,
               product: { connect: { id: p.productId } },
               recipe: p.recipeId ? { connect: { id: p.recipeId } } : undefined,
-              packaging: { connect: { id: p.packagingId } },
+              packaging: { connect: { id: p.packagingId || defaultPackaging.id } },
+              selectedVariants: p.selectedVariants ? {
+                create: p.selectedVariants.map(v => ({
+                  variantOption: { connect: { id: v.id } },
+                  priceAtOrder: parseFloat(v.priceAdjustment || 0)
+                }))
+              } : undefined,
+              selectedExtras: p.selectedExtras ? {
+                create: p.selectedExtras.map(e => ({
+                  extra: { connect: { id: e.id } },
+                  priceAtOrder: parseFloat(e.price || 0)
+                }))
+              } : undefined
             })),
           },
         },
@@ -127,6 +151,16 @@ export default async function handler(req, res) {
               product: true,
               recipe: true,
               packaging: true,
+              selectedVariants: {
+                include: {
+                  variantOption: true
+                }
+              },
+              selectedExtras: {
+                include: {
+                  extra: true
+                }
+              }
             },
           },
         },
@@ -141,6 +175,8 @@ export default async function handler(req, res) {
     console.error("Orders API error:", error);
     console.error("Error details:", error.message);
     console.error("Stack trace:", error.stack);
+    // Log the failing data
+    console.error("Failing payload:", JSON.stringify(req.body, null, 2));
     res.status(500).json({ error: "Internal server error", details: error.message });
   }
 }
