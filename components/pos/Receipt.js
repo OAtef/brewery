@@ -105,10 +105,12 @@ export default function Receipt({ orderData, onPrint }) {
             <Typography variant="body2">Subtotal:</Typography>
             <Typography variant="body2">${orderData.subtotal?.toFixed(2) || '0.00'}</Typography>
           </Box>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-            <Typography variant="body2">Tax:</Typography>
-            <Typography variant="body2">${orderData.tax?.toFixed(2) || '0.00'}</Typography>
-          </Box>
+          {orderData.tax > 0 && (
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+              <Typography variant="body2">Tax:</Typography>
+              <Typography variant="body2">${orderData.tax?.toFixed(2) || '0.00'}</Typography>
+            </Box>
+          )}
           {orderData.discount > 0 && (
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
               <Typography variant="body2">Discount:</Typography>

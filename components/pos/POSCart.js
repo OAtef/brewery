@@ -23,16 +23,14 @@ import PaymentIcon from '@mui/icons-material/Payment';
  * @param {Function} onRemoveItem - Callback to remove item
  * @param {Function} onEditItem - Callback to edit item
  * @param {Function} onProceedToPayment - Callback to proceed to payment
- * @param {number} taxRate - Tax rate (default: 0.08 for 8%)
  */
 export default function POSCart({
   items = [],
   onRemoveItem,
   onEditItem,
   onProceedToPayment,
-  taxRate = 0.08,
 }) {
-  // Calculate totals
+  // Calculate totals (no tax applied)
   const subtotal = items.reduce((sum, item) => {
     const itemPrice = item.unitPrice || 0;
     const packagingCost = item.packaging?.costPerUnit || 0;
@@ -40,8 +38,7 @@ export default function POSCart({
     return sum + itemTotal;
   }, 0);
 
-  const tax = subtotal * taxRate;
-  const total = subtotal + tax;
+  const total = subtotal;
 
   // Format item display name
   const getItemDisplayName = (item) => {
@@ -206,22 +203,12 @@ export default function POSCart({
       {/* Cart Summary */}
       <Box sx={{ p: 2, borderTop: '2px solid', borderColor: 'divider' }}>
         {/* Subtotal */}
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
           <Typography variant="body1" sx={{ fontSize: '16px' }}>
             Subtotal:
           </Typography>
           <Typography variant="body1" sx={{ fontSize: '16px', fontWeight: 500 }}>
             ${subtotal.toFixed(2)}
-          </Typography>
-        </Box>
-
-        {/* Tax */}
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-          <Typography variant="body2" color="text.secondary" sx={{ fontSize: '14px' }}>
-            Tax ({(taxRate * 100).toFixed(0)}%):
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ fontSize: '14px' }}>
-            ${tax.toFixed(2)}
           </Typography>
         </Box>
 

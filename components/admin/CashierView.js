@@ -145,15 +145,15 @@ export default function CashierView() {
     // Handle payment completion
     const handlePaymentComplete = async (paymentData) => {
         try {
-            // Calculate totals
+            // Calculate totals (no tax applied)
             const subtotal = cart.reduce((sum, item) => {
                 const itemPrice = item.unitPrice || 0;
                 const packagingCost = item.packaging?.costPerUnit || 0;
                 return sum + (itemPrice + packagingCost) * item.quantity;
             }, 0);
 
-            const tax = subtotal * 0.08;
-            const total = subtotal + tax;
+            const tax = 0;
+            const total = subtotal;
 
             // Generate receipt number
             const receiptNumber = `RCP-${Date.now()}`;
@@ -359,7 +359,7 @@ export default function CashierView() {
                     const packagingCost = item.packaging?.costPerUnit || 0;
                     const itemTotal = (itemPrice + packagingCost) * item.quantity;
                     return sum + itemTotal;
-                }, 0) * 1.08} // Include 8% tax
+                }, 0)} // No tax applied
                 onPaymentComplete={handlePaymentComplete}
             />
 
