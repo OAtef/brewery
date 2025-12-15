@@ -62,12 +62,14 @@ const CostAnalysis = () => {
 
   useEffect(() => {
     fetchCostData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedPeriod]);
 
   useEffect(() => {
     // Auto-refresh every 2 minutes
     const interval = setInterval(fetchCostData, 2 * 60 * 1000);
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedPeriod]);
 
   const formatCurrency = (amount) => {

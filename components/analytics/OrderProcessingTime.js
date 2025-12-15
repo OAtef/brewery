@@ -86,12 +86,14 @@ const OrderProcessingTime = () => {
 
   useEffect(() => {
     fetchProcessingData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedPeriod]);
 
   useEffect(() => {
     // Auto-refresh every 2 minutes
     const interval = setInterval(fetchProcessingData, 2 * 60 * 1000);
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedPeriod]);
 
   const formatTime = (minutes) => {

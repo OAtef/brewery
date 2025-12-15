@@ -148,7 +148,7 @@ export default function ProductDialog({ open, onClose, onSave }) {
                         </Button>
                     </Box>
                     <Typography variant="caption" color="text.secondary">
-                        e.g. "Milk Type" with options "Whole", "Oat (+0.50)"
+                        e.g. &quot;Milk Type&quot; with options &quot;Whole&quot;, &quot;Oat (+0.50)&quot;
                     </Typography>
 
                     {variantGroups.map((group, groupIndex) => (

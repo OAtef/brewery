@@ -87,12 +87,14 @@ const RevenueTrends = () => {
 
   useEffect(() => {
     fetchRevenueData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedPeriod]);
 
   useEffect(() => {
     // Auto-refresh every 5 minutes
     const interval = setInterval(fetchRevenueData, 5 * 60 * 1000);
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedPeriod]);
 
   const formatCurrency = (amount) => {

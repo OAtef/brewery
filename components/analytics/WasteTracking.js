@@ -87,12 +87,14 @@ const WasteTracking = () => {
   useEffect(() => {
     fetchWasteData();
     fetchIngredients();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedPeriod]);
 
   useEffect(() => {
     // Auto-refresh every 30 seconds
     const interval = setInterval(fetchWasteData, 30 * 1000);
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedPeriod]);
 
   const handleAddWaste = async () => {
