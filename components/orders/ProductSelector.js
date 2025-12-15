@@ -33,6 +33,7 @@ export default function ProductSelector({
         if (open && productId) {
             fetchData();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [open, productId]);
 
     const fetchData = async () => {

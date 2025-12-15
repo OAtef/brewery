@@ -209,7 +209,7 @@ export default function EditProductDialog({ open, onClose, product, onSave }) {
 
                     {variantGroups.length === 0 && (
                         <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 2 }}>
-                            No variant groups. Click "Add Group" to create one.
+                            No variant groups. Click &quot;Add Group&quot; to create one.
                         </Typography>
                     )}
 
