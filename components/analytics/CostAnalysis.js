@@ -247,7 +247,7 @@ const CostAnalysis = () => {
                                   {product.name}
                                 </Typography>
                                 <Typography variant="caption" color="text.secondary">
-                                  {product.category} • Sold: {product.totalQuantitySold}
+                                  {typeof product.category === 'object' ? product.category?.name : product.category} • Sold: {product.totalQuantitySold}
                                 </Typography>
                               </Box>
                             </TableCell>
@@ -308,7 +308,7 @@ const CostAnalysis = () => {
                                   {product.name}
                                 </Typography>
                                 <Typography variant="caption" color="text.secondary">
-                                  {product.category} • Sold: {product.totalQuantitySold}
+                                  {typeof product.category === 'object' ? product.category?.name : product.category} • Sold: {product.totalQuantitySold}
                                 </Typography>
                               </Box>
                             </TableCell>
@@ -412,7 +412,7 @@ const CostAnalysis = () => {
                           }
                           secondary={
                             <Typography variant="caption" color="text.secondary">
-                              {ingredient.totalQuantityUsed} {ingredient.unit} used • 
+                              {ingredient.totalQuantityUsed} {ingredient.unit} used •
                               {formatCurrency(ingredient.costPerUnit)}/{ingredient.unit}
                             </Typography>
                           }

@@ -99,14 +99,33 @@ export default async function handler(req, res) {
       res.status(200).json(updatedOrder);
     } else if (req.method === "DELETE") {
       // Delete an order
+      // First, get all order products
+      const orderProducts = await prisma.orderProduct.findMany({
+        where: { orderId: parseInt(id) },
+        select: { id: true }
+      });
+
+      // Delete related variants and extras for each order product
+      for (const orderProduct of orderProducts) {
+        await prisma.orderProductVariant.deleteMany({
+          where: { orderProductId: orderProduct.id }
+        });
+        await prisma.orderProductExtra.deleteMany({
+          where: { orderProductId: orderProduct.id }
+        });
+      }
+
+      // Delete order products
       await prisma.orderProduct.deleteMany({
         where: { orderId: parseInt(id) },
       });
+
+      // Delete the order
       await prisma.order.delete({
         where: { id: parseInt(id) },
       });
 
-      res.status(204).end();
+      res.status(200).json({ message: "Order deleted successfully" });
     } else {
       res.setHeader("Allow", ["GET", "PUT", "DELETE"]);
       res.status(405).json({ error: `Method ${req.method} not allowed` });

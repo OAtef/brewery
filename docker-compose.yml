@@ -14,7 +14,7 @@ services:
       - /app/.next
     depends_on:
       - db
-    command: sh -c "npx prisma migrate deploy && npx prisma generate && npm run db:seed && npm run dev"
+    command: sh -c "npm install && npx prisma migrate deploy && npx prisma generate && npm run db:seed && npm run dev"
 
   db:
     image: postgres:15-alpine
@@ -23,7 +23,7 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=password
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 

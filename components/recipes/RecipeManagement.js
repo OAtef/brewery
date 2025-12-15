@@ -78,6 +78,21 @@ export default function RecipeManagement() {
   const [recipeSortBy, setRecipeSortBy] = useState("productName");
   const [recipeSortOrder, setRecipeSortOrder] = useState("asc");
 
+  // Helper to safely get category name
+  const getCategoryName = (categoryOrProduct) => {
+    // If passed a product object
+    if (categoryOrProduct && typeof categoryOrProduct === 'object' && 'category' in categoryOrProduct) {
+      const cat = categoryOrProduct.category;
+      if (!cat) return "";
+      if (typeof cat === 'string') return cat;
+      return cat.name || "";
+    }
+    // If passed a category object or string directly
+    if (!categoryOrProduct) return "";
+    if (typeof categoryOrProduct === 'string') return categoryOrProduct;
+    return categoryOrProduct.name || "";
+  };
+
   // Dialog states
   const [addProductDialogOpen, setAddProductDialogOpen] = useState(false);
   const [addRecipeDialogOpen, setAddRecipeDialogOpen] = useState(false);
@@ -155,7 +170,7 @@ export default function RecipeManagement() {
     // Category filter
     if (productCategoryFilter) {
       filtered = filtered.filter(
-        (product) => product.category === productCategoryFilter
+        (product) => getCategoryName(product) === productCategoryFilter
       );
     }
 
@@ -168,8 +183,8 @@ export default function RecipeManagement() {
           bVal = b.name.toLowerCase();
           break;
         case "category":
-          aVal = a.category.toLowerCase();
-          bVal = b.category.toLowerCase();
+          aVal = getCategoryName(a).toLowerCase();
+          bVal = getCategoryName(b).toLowerCase();
           break;
         case "recipeCount":
           aVal = a.recipes?.length || 0;
@@ -221,7 +236,7 @@ export default function RecipeManagement() {
     // Category filter
     if (recipeCategoryFilter) {
       filtered = filtered.filter(
-        (recipe) => recipe.product?.category === recipeCategoryFilter
+        (recipe) => getCategoryName(recipe.product) === recipeCategoryFilter
       );
     }
 
@@ -273,8 +288,8 @@ export default function RecipeManagement() {
           bVal = b.variant.toLowerCase();
           break;
         case "category":
-          aVal = a.product?.category.toLowerCase() || "";
-          bVal = b.product?.category.toLowerCase() || "";
+          aVal = getCategoryName(a.product).toLowerCase();
+          bVal = getCategoryName(b.product).toLowerCase();
           break;
         case "cost":
           aVal = calculateRecipeCost(a);
@@ -385,7 +400,7 @@ export default function RecipeManagement() {
 
   // Get unique values for filters
   const getUniqueCategories = () => {
-    return [...new Set(products.map((p) => p.category))].sort();
+    return [...new Set(products.map((p) => getCategoryName(p)))].sort();
   };
 
   const getUniqueVariants = () => {
@@ -571,7 +586,7 @@ export default function RecipeManagement() {
                 }
               >
                 {category} (
-                {products.filter((p) => p.category === category).length})
+                {products.filter((p) => getCategoryName(p) === category).length})
               </Button>
             ))}
           </Box>
@@ -603,7 +618,7 @@ export default function RecipeManagement() {
                       {product.name}
                     </Typography>
                     <Chip
-                      label={product.category}
+                      label={getCategoryName(product)}
                       color="primary"
                       size="small"
                       sx={{ mb: 2 }}
@@ -946,12 +961,12 @@ export default function RecipeManagement() {
                           calculateRecipeCost(recipe) >= 5
                             ? "warning.main"
                             : calculateRecipeCost(recipe) < 2
-                            ? "success.main"
-                            : "inherit"
+                              ? "success.main"
+                              : "inherit"
                         }
                         fontWeight={
                           calculateRecipeCost(recipe) >= 5 ||
-                          calculateRecipeCost(recipe) < 2
+                            calculateRecipeCost(recipe) < 2
                             ? "bold"
                             : "normal"
                         }

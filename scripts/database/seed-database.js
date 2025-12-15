@@ -6,11 +6,11 @@ async function seedDatabase() {
   try {
     console.log('🌱 Checking database state and seeding if needed...\n');
 
-    // Always ensure admin user exists
-    console.log('1. Ensuring admin user exists...');
+    // Always ensure users exist
+    console.log('1. Ensuring users exist...');
     const bcrypt = require('bcryptjs');
     const hashedPassword = await bcrypt.hash('admin123', 10);
-    
+
     const adminUser = await prisma.user.upsert({
       where: { email: 'admin@coffeeshop.com' },
       update: {
@@ -26,6 +26,40 @@ async function seedDatabase() {
       },
     });
     console.log(`✅ Admin user ready: ${adminUser.email} (password: admin123)`);
+
+    // Create cashier user
+    const cashierUser = await prisma.user.upsert({
+      where: { email: 'cashier@coffeeshop.com' },
+      update: {
+        name: 'Cashier User',
+        password: hashedPassword,
+        role: 'CASHIER',
+      },
+      create: {
+        name: 'Cashier User',
+        email: 'cashier@coffeeshop.com',
+        password: hashedPassword,
+        role: 'CASHIER',
+      },
+    });
+    console.log(`✅ Cashier user ready: ${cashierUser.email} (password: admin123)`);
+
+    // Create barista user
+    const baristaUser = await prisma.user.upsert({
+      where: { email: 'barista@coffeeshop.com' },
+      update: {
+        name: 'Barista User',
+        password: hashedPassword,
+        role: 'BARISTA',
+      },
+      create: {
+        name: 'Barista User',
+        email: 'barista@coffeeshop.com',
+        password: hashedPassword,
+        role: 'BARISTA',
+      },
+    });
+    console.log(`✅ Barista user ready: ${baristaUser.email} (password: admin123)`);
 
     // Check if database already has sample data
     const existingIngredients = await prisma.ingredient.count();

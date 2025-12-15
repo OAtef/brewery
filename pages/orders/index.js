@@ -34,7 +34,7 @@ import { useRouter } from "next/router";
 
 const ORDER_STATUSES = [
   "PENDING",
-  "CONFIRMED", 
+  "CONFIRMED",
   "PREPARING",
   "READY",
   "COMPLETED",
@@ -44,7 +44,7 @@ const ORDER_STATUSES = [
 const STATUS_COLORS = {
   PENDING: "warning",
   CONFIRMED: "info",
-  PREPARING: "primary", 
+  PREPARING: "primary",
   READY: "success",
   COMPLETED: "default",
   CANCELLED: "error"
@@ -64,7 +64,7 @@ export default function OrderManagement() {
       router.push("/");
       return;
     }
-    
+
     if (user.role !== "ADMIN" && user.role !== "MANAGER" && user.role !== "BARISTA") {
       router.push("/");
       return;
@@ -113,8 +113,8 @@ export default function OrderManagement() {
     setDetailDialogOpen(true);
   };
 
-  const filteredOrders = statusFilter === "ALL" 
-    ? orders 
+  const filteredOrders = statusFilter === "ALL"
+    ? orders
     : orders.filter(order => order.status === statusFilter);
 
   const formatDate = (dateString) => {
@@ -122,7 +122,7 @@ export default function OrderManagement() {
   };
 
   const calculateOrderTotal = (order) => {
-    return order.products.reduce((total, product) => 
+    return order.products.reduce((total, product) =>
       total + (product.unitPrice * product.quantity), 0
     );
   };
@@ -256,11 +256,11 @@ export default function OrderManagement() {
                 </Grid>
                 <Grid item xs={6}>
                   <Typography variant="h6">Order Information</Typography>
-                  <Typography>Status: 
-                    <Chip 
-                      label={selectedOrder.status} 
-                      color={STATUS_COLORS[selectedOrder.status]} 
-                      size="small" 
+                  <Typography>Status:
+                    <Chip
+                      label={selectedOrder.status}
+                      color={STATUS_COLORS[selectedOrder.status]}
+                      size="small"
                       sx={{ ml: 1 }}
                     />
                   </Typography>
